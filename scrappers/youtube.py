@@ -878,26 +878,7 @@ if __name__ == "__main__":
     # Instantiate the scraper
     scraper = YouTubeScraper()
 
-    # --- Start Isolated Transcribe Audio Test (Comment out) ---
-    # # Replace 'path/to/your/large_audio_file.mp3' with the actual path to your file.
-    # # Ensure the file exists at this path and is accessible.
-    # # Monitor RAM usage while this code runs.
-    # # test_audio_path = 'path/to/your/large_audio_file.mp3' # <<< REPLACE THIS LINE
-    # # print(f"Attempting to transcribe: {test_audio_path}")
-    # # try:
-    # #     # Note: This will fail if the file path is not valid or the file doesn't exist
-    # #     # The user needs to provide a valid path to a large audio file.
-    # #     if os.path.exists(test_audio_path):
-    # #         transcribed_text = scraper.transcribe_audio(test_audio_path) # Removed chunk_duration_seconds as Whisper handles it
-    # #         print("Transcription complete (if no errors occurred).")
-    # #         print(f"First 500 characters of transcription: {transcribed_text[:500]}...")
-    # #         # The user should manually verify the full transcription and RAM usage.
-    # #     else:
-    # #         print(f"Error: Audio file not found at {test_audio_path}. Please provide a valid path.")
-
-    # # except Exception as e:
-    # #     print(f"An unexpected error occurred during isolated transcription test: {e}")
-    # --- End Isolated Transcribe Audio Test ---
+    
 
 
     # --- Original Example Usage ---
