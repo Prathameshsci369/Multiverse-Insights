@@ -5,26 +5,100 @@ import time
 import json
 import os  # Import os module for directory operations
 import prawcore # Import prawcore for specific exceptions
-from search import SearchQueryGenerator
+#from search import SearchQueryGenerator
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Initialize the ML-based query generator
-ml_query_generator = SearchQueryGenerator()
+#ml_query_generator = SearchQueryGenerator()
 
 # Define a function to generate Reddit queries using the ML model
-def generate_reddit_query(input_text):
-    return ml_query_generator.generate_search_query(input_text)
+# def generate_reddit_query(input_text):
+#     return ml_query_generator.generate_search_query(input_text)
+
+# Add at the top with other imports
+import requests
+
+GEMINI_API_KEY = "ENTER_YOUR_GEMINI_API"  # Replace with your actual Gemini API key
+import requests # Make sure you have this import
+
+#GEMINI_API_KEY = "YOUR_ACTUAL_GEMINI_API_KEY"  # !!! IMPORTANT: Replace with your actual, secure Gemini API key. Never share this publicly.
+# Use gemini-2.0-flash model endpoint for query generation
+GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+
+def gemini_reduce_query(user_prompt, feedback=None):
+    """
+    Send user prompt (and optional feedback) to Gemini API to get a reduced, keyword-based query for Reddit search.
+    """
+    system_prompt = (
+        "You are an expert at generating concise, keyword-based search queries for Reddit. "
+        "Given a user prompt, reduce it to the most effective search query for Reddit's search engine. "
+        "Only return the query string."
+    )
+    if feedback:
+        system_prompt += f"\nUser feedback: {feedback}"
+        
+    # Combine system prompt and user prompt into a single user message
+    full_prompt = system_prompt + "\n\n" + user_prompt
+
+    payload = {
+        "contents": [
+            {
+                "role": "user",
+                "parts": [{"text": full_prompt}]
+            }
+        ]
+    }
+    try:
+        response = requests.post(GEMINI_API_URL, json=payload)
+        
+        # Check for specific error codes for better debugging
+        if response.status_code == 404:
+            print("Error: Gemini API endpoint not found. Double-check the model name in the URL (e.g., gemini-1.0-pro, gemini-1.5-flash, gemini-2.0-flash) and the API version (v1beta).")
+            return user_prompt
+        if response.status_code == 403:
+            print("Error: Gemini API key is invalid or quota exceeded. Verify your API key and check your usage limits.")
+            return user_prompt
+        if response.status_code == 400:
+            print(f"Error: Gemini API request is malformed. Response: {response.text}. Please check your API key and payload format (especially the 'role' field in 'contents').")
+            return user_prompt
+
+        response.raise_for_status() # This will raise an HTTPError for bad responses (4xx or 5xx)
+        data = response.json()
+        
+        # Extract the query from Gemini's response
+        try:
+            # Ensure the response structure is as expected
+            if "candidates" in data and len(data["candidates"]) > 0 and \
+               "content" in data["candidates"][0] and \
+               "parts" in data["candidates"][0]["content"] and \
+               len(data["candidates"][0]["content"]["parts"]) > 0 and \
+               "text" in data["candidates"][0]["content"]["parts"][0]:
+                query = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                return query
+            else:
+                print("Error: Unexpected Gemini API response format. Missing expected fields in 'candidates' or 'parts'.")
+                return user_prompt
+        except Exception as e:
+            print(f"Error parsing Gemini API response: {e}. Raw response: {data}. Returning original prompt.")
+            return user_prompt
+    except requests.exceptions.RequestException as e:
+        print(f"Error communicating with Gemini API (requests library error): {e}")
+        return user_prompt # fallback to original prompt
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return user_prompt
+
 
 class RedditScraper:
     def __init__(self):  # Removed credentials_file argument
         try:
             # Hardcoded credentials as per user request
-            client_id = "CLIENT_ID"
-            client_secret = "CLIENT_SECRET"
-            username = "REDDIT_USERNAME" # Ensure this is exactly your Reddit username
-            password = "REDDIT_ACCOUNT_PASSWORD" # Ensure this is exactly your Reddit password
+            client_id = "I_P_f4B5dfIlIVQKfqoTYA"
+            client_secret = "Qlzq0fnnb2WIDDYzdZvOuJnAPuMpJg"
+            username = "Cool_Campaign8402" # Ensure this is exactly your Reddit username
+            password = "Silent@1432" # Ensure this is exactly your Reddit password
             
             user_agent = f"python:project1:v1.3.0 (by /u/{username})" # Updated user_agent version
             logger.info(f"Attempting to initialize PRAW with username: {username}, client_id: {client_id}, and user_agent: {user_agent}")
@@ -130,7 +204,7 @@ class RedditScraper:
                 logger.error(f"Could not fetch posts from subreddit {sub}: {str(e)}")
         return posts
 
-    def extract_topics(self, posts, top_n=15): # This method might not be directly used in the new flow but kept for now
+    def extract_topics(self, posts, top_n=15): # This method might not be directly 
         try:
             words = []
             for post in posts:
@@ -170,7 +244,7 @@ class RedditScraper:
 
     def search_and_fetch_top_posts(self, query, limit=5, num_comments=10, num_subcomments=5):
         """
-        Searches Reddit globally for a query and fetches the top N posts.
+        Searches Reddit globally for a query and fetches the top N posts that have selftext.
         """
         if not self.reddit:
             logger.error("Reddit instance not available. Cannot search posts.")
@@ -179,16 +253,25 @@ class RedditScraper:
         posts_data = []
         seen_urls = set()
         try:
-            logger.info(f"Searching Reddit globally for query: '{query}' with limit {limit}, sorting by relevance.")
-            # Search across 'all' subreddits for a global search, sorting by relevance
-            search_results = self.reddit.subreddit("all").search(query, limit=limit, sort='relevance') # Changed sort to 'relevance'
+            logger.info(f"Searching Reddit globally for query: '{query}' with a goal of {limit} posts with selftext, sorting by relevance.")
+            
+            # --- MODIFICATION START ---
+            # Increase the PRAW search limit to ensure we fetch enough raw results
+            # to find 'limit' posts that actually have selftext. A common heuristic is limit * 2 or 3.
+            praw_search_limit = limit * 2 # Fetch double the requested limit from PRAW
+            search_results = self.reddit.subreddit("all").search(query, limit=praw_search_limit, sort='relevance')
+            # --- MODIFICATION END ---
 
-            count = 0
             for post in search_results:
-                if count >= limit:
-                    logger.info(f"Reached fetch limit of {limit} posts.")
-                    break
                 self.rate_limit()
+
+                # --- MODIFICATION START ---
+                # This check ensures we stop processing once we have collected the desired 'limit' posts.
+                if len(posts_data) >= limit:
+                    logger.info(f"Successfully collected {limit} posts with selftext. Stopping further processing of search results.")
+                    break
+                # --- MODIFICATION END ---
+
                 # Ensure post has selftext and is not a duplicate
                 if post.url not in seen_urls and hasattr(post, 'selftext') and post.selftext and post.selftext.strip() != "":
                     logger.info(f"Processing post: {post.title[:50]}... (ID: {post.id})")
@@ -196,9 +279,9 @@ class RedditScraper:
                     if post_data_item:
                         posts_data.append(post_data_item)
                         seen_urls.add(post.url)
-                        count += 1
+                        # The counter (implied by len(posts_data)) now only increments for valid posts
                     else:
-                        logger.warning(f"Failed to get data for post {post.id}, it might have been skipped (e.g. empty selftext).")
+                        logger.warning(f"Failed to get data for post {post.id}, it might have been skipped (e.g. empty selftext or other error in get_post_data).")
                 elif not hasattr(post, 'selftext') or not post.selftext or post.selftext.strip() == "":
                     logger.info(f"Skipping post {post.id} (URL: {post.url}): No selftext or empty selftext.")
                 elif post.url in seen_urls:
@@ -220,49 +303,51 @@ class RedditScraper:
         except Exception as e:
             logger.error(f"Generic error searching and fetching posts for query '{query}': {str(e)}")
             return []
-
 # Replace simple_query_refiner with advanced_query_refiner in the main execution block
 if __name__ == "__main__":
     raw_prompt = input("Enter your search prompt for Reddit: ")
-    
     if not raw_prompt.strip():
         print("Search prompt cannot be empty.")
     else:
-        # Generate the query using the ML-based generator
-        final_query = generate_reddit_query(raw_prompt)
-        print(f"Generated query: \"{final_query}\"")
-        
-        # Final approval before searching Reddit
-        approval = input("\nDo you want to search Reddit with this query? (yes/no): ").strip().lower()
-        
-        if approval == 'yes' or approval == 'y':
-            scraper = RedditScraper()
-            if scraper.reddit: # Check if Reddit instance was successfully created
-                print(f"Searching Reddit for: \"{final_query}\"...")
-                # Fetch top 5 posts, with 5 comments each, and 2 subcomments for each comment
-                scraped_data = scraper.search_and_fetch_top_posts(final_query, limit=5, num_comments=5, num_subcomments=2)
-                
-                if scraped_data:
-                    output_filename = "data/reddit_search_output.json"
-                    try:
-                        # Ensure the data directory exists
-                        os.makedirs(os.path.dirname(output_filename), exist_ok=True)
-                        
-                        with open(output_filename, "w") as f:
-                            json.dump(scraped_data, f, indent=4)
-                        print(f"Successfully saved {len(scraped_data)} posts to {output_filename}")
-                        
-                        # Display titles of scraped posts
-                        print("\n--- Scraped Post Titles ---")
-                        for i, post_info in enumerate(scraped_data):
-                            print(f"{i+1}. {post_info.get('title', 'N/A')}")
-                        print("---------------------------\n")
-
-                    except IOError as e:
-                        print(f"Error saving data to JSON file: {e}")
-                else:
-                    print("No data was scraped from Reddit, or an error occurred during scraping.")
+        # Step 1: Use Gemini API to reduce/refine the query
+        final_query = gemini_reduce_query(raw_prompt)
+        print(f"Gemini-generated search query: \"{final_query}\"")
+        feedback = None
+        while True:
+            approval = input("\nDo you want to search Reddit with this query? (yes/no/f): ").strip().lower()
+            if approval in ['yes', 'y']:
+                break
+            elif approval == 'no':
+                print("Search cancelled by user.")
+                exit(0)
+            elif approval == 'f':
+                feedback = input("Enter your feedback to improve the query: ")
+                final_query = gemini_reduce_query(raw_prompt, feedback)
+                print(f"Updated Gemini-generated query: \"{final_query}\"")
             else:
-                print("Failed to initialize Reddit scraper. Please check logs for errors (e.g., authentication).")
+                print("Please enter 'yes', 'no', or 'feedback'.")
+
+        scraper = RedditScraper()
+        if scraper.reddit: # Check if Reddit instance was successfully created
+            print(f"Searching Reddit for: \"{final_query}\"...")
+            # Fetch top 5 posts, with 5 comments each, and 2 subcomments for each comment
+            scraped_data = scraper.search_and_fetch_top_posts(final_query, limit=5, num_comments=5, num_subcomments=2)
+            if scraped_data:
+                output_filename = "reddit_search_output.json"
+                try:
+                    # Ensure the data directory exists
+                    #os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+                    with open(output_filename, "w") as f:
+                        json.dump(scraped_data, f, indent=4)
+                    print(f"Successfully saved {len(scraped_data)} posts to {output_filename}")
+                    # Display titles of scraped posts
+                    print("\n--- Scraped Post Titles ---")
+                    for i, post_info in enumerate(scraped_data):
+                        print(f"{i+1}. {post_info.get('title', 'N/A')}")
+                    print("---------------------------\n")
+                except IOError as e:
+                    print(f"Error saving data to JSON file: {e}")
+            else:
+                print("No data was scraped from Reddit, or an error occurred during scraping.")
         else:
-            print("Search cancelled by user.")
+            print("Failed to initialize Reddit scraper. Please check logs for errors (e.g., authentication).")
