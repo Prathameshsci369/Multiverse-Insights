@@ -243,6 +243,54 @@ Efficient reel scraping using official API and a robust Playwright-based alterna
 
 
 ---
+
+# 📘 Facebook Scraping Pipeline
+
+---
+
+### A. Official Graph API (Limited Use)
+
+* Requires Facebook Developer App & token
+* Retrieves post text, likes, comments, media URLs
+* **Only works** for your pages or public content (post-review)
+
+### B. Alternative Method: Playwright + Cookies ✅
+
+#### Pipeline:
+
+1. **Login via Cookies**: Maintains session, bypasses login barriers
+
+2. **Gemini Refined Query**: Enhances user input for targeted Facebook search
+
+3. **Search Posts**: Automate post-only search via Playwright
+
+4. **Click "See More"**: Expands full post content dynamically
+
+5. **Scroll & Capture**: Render page into a PDF snapshot
+
+6. **Parse PDF via Regex**: Extract:
+
+   * Usernames, text, dates, likes, shares, comments, media links
+
+   ```python
+   r"(\d{1,2} \w+ \d{4})"         # Date
+   r"by ([\w\s]+)"                # Username
+   r"(\d+ shares|likes|comments)"  # Engagement
+   r"https://.*?\.(mp4|jpg|png)"   # Media
+   ```
+
+7. **Download Media**:
+
+   * Use `yt-dlp` or Playwright + cookies
+   * Save videos/images with post-related names
+
+8. **Save Results**:
+
+   * JSON for post data
+   * Organized folders for media
+
+
+
 ---
 
 ## 🧠 Developer Tips
