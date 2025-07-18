@@ -225,8 +225,7 @@ Efficient reel scraping using official API and a robust Playwright-based alterna
 ###  Tech Stack & Pipeline:
 
 - `Gemini`: Refines user search query
-- `Playwright`: Logs in via cookies, automates Instagram search
-- Scrolls and captures result page as PDF
+- `Playwright`: Logs in via cookies, automates Instagram search,Scrolls and captures result page as PDF
 - `PDFPlumber + Regex`: Extracts reel URLs from PDF
 - `Instaloader` or `yt_dlp`: Downloads reels, captions, likes, comments
 - `Whisper`: Accepts full reel video, auto-extracts and transcribes audio (multilingual + translation)
