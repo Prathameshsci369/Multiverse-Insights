@@ -203,6 +203,47 @@ This method is extremely useful when you're scraping public Reddit threads witho
   * `video_data.json`
   * `video_transcripts.csv`
 
+
+
+# 📸 Instagram Scraping Techniques
+
+Efficient reel scraping using official API and a robust Playwright-based alternative. Whisper automatically extracts and transcribes audio from video — no manual audio handling needed.
+
+---
+
+## 1️⃣ Official Method: Instagram Graph API
+
+- Requires App ID, App Secret, Access Token (Meta Developer Console)
+- Accesses media metadata (captions, timestamps, media_type)
+- No access to comments, reels audio, or transcripts
+- Rate-limited and approval required
+
+---
+
+## 2️⃣ Alternative: Playwright + Whisper
+
+###  Tech Stack & Pipeline:
+
+- `Gemini`: Refines user search query
+- `Playwright`: Logs in via cookies, automates Instagram search
+- Scrolls and captures result page as PDF
+- `PDFPlumber + Regex`: Extracts reel URLs from PDF
+- `Instaloader` or `yt_dlp`: Downloads reels, captions, likes, comments
+- `Whisper`: Accepts full reel video, auto-extracts and transcribes audio (multilingual + translation)
+- Results saved as structured `JSON` for further processing
+
+---
+
+## ✅ Advantages:
+
+- No API keys or rate limits
+- Works with transcript-disabled reels
+- Auto-translates reel speech to target language
+- Bypasses caption limitations with full audio transcription
+- Efficient for large-scale, language-diverse scraping
+
+
+---
 ---
 
 ## 🧠 Developer Tips
@@ -219,7 +260,5 @@ re.findall(r"#\w+", text)
 * Maintain modular pipeline: `input → refine → extract → transform → save`
 * Cache failures and cooldowns to improve retry logic
 * Store intermediate data to reduce re-runs
-
----
 
 By combining async scraping, browser automation, AI-powered query optimization, PDF extraction, regex parsing, and fallback techniques like Whisper, we enable scalable and language-agnostic social media data mining across platforms.
