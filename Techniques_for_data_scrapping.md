@@ -291,7 +291,81 @@ Efficient reel scraping using official API and a robust Playwright-based alterna
 
 
 
+
 ---
+
+### 💼 LinkedIn Scraping
+
+**Official API:** Restricted to partners.
+
+**Alternate Tech:**
+
+* Login with cookies
+* Playwright → Search query → Expand posts
+* Save PDF → Extract metadata
+
+**Regex Patterns:**
+
+```python
+r"\d{1,2} \w+ \d{4}", r"\d+ reactions", r"\d+ comments", r"See more", r"https://www.linkedin.com/in/.+"
+```
+
+---
+
+### 📌 Pinterest Scraping
+
+**Official API:** Deprecated/internal use.
+
+**Alternate Tech:**
+
+* Playwright scroll through keyword pins
+* PDF export → Extract pins and repins
+* OCR (optional) for embedded text
+
+**Regex Patterns:**
+
+```python
+r"https://www.pinterest.com/pin/[\w-]+", r"Repinned \d+ times", r"\d{1,2} \w+ \d{4}"
+```
+
+---
+
+### 🗣️ Quora Scraping
+
+**Official API:** Not public.
+
+**Alternate Tech:**
+
+* Playwright search → Expand answers
+* Save PDF → Extract Q\&A and meta
+
+**Regex Patterns:**
+
+```python
+r"\d{1,2} \w+ \d{4}", r"\d+ upvotes", r"https://www.quora.com/.+", r"Answered by .+"
+```
+
+---
+
+### 🧵 Threads Scraping
+
+**Official API:** Not yet available.
+
+**Alternate Tech:**
+
+* Login with cookies
+* Playwright scroll and extract thread replies
+* Save as PDF → Parse post data
+
+**Regex Patterns:**
+
+```python
+r"\d{1,2} \w+ \d{4}", r"https://www.threads.net/@.+", r"\d+ likes", r"\d+ replies"
+```
+
+---
+
+
 
 ## 🧠 Developer Tips
 
