@@ -1,0 +1,1862 @@
+[
+    {
+        "title": "Quantum computing in 10 years",
+        "url": "https://www.reddit.com/r/QuantumComputing/comments/1majz0t/quantum_computing_in_10_years/",
+        "score": 73,
+        "comments_count": 91,
+        "author": "BVAcupcake",
+        "created_utc": 1753615737.0,
+        "selftext": "Where do you think QC will be in 10 years?",
+        "comments": [
+            {
+                "author": "Normal_Imagination54",
+                "comment": "10 years away",
+                "published_at": 1753615820.0,
+                "likes": 71,
+                "subcomments": [
+                    {
+                        "author": "0xB01b",
+                        "comment": "Disagree, NISQ devices already allow us to study physics in ways that classical computers don't allow.",
+                        "published_at": 12,
+                        "likes": 12
+                    },
+                    {
+                        "author": "BitcoinsOnDVD",
+                        "comment": "I like how a certain group in this sub gets more and more annoyed.",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "0xB01b",
+                "comment": "I think we'll have a number of devices with 100+ logical qubits and will already be at a good point for scientific application",
+                "published_at": 1753618064.0,
+                "likes": 19,
+                "subcomments": [
+                    {
+                        "author": "Unknown",
+                        "comment": "[deleted]",
+                        "published_at": -4,
+                        "likes": -4
+                    },
+                    {
+                        "author": "qwertUkg",
+                        "comment": "Especially effective when paired with an LLM",
+                        "published_at": -12,
+                        "likes": -12
+                    }
+                ]
+            },
+            {
+                "author": "HughJaction",
+                "comment": "The ten years away is probably not far wrong. But to answer the question in all seriousness:\n\n- nisq devices: devices will have increased in size to ~1000s of qubits, though they *won’t be able to much more* than they can now (which is nothing at all) because without error correction it’s just not gunna happen and anyone telling you it’s useful in anyway is a stone-cold liar, no two ways about it; they know the truth, they’re trying to cheat you. Also, companies will still be selling their VQE solutions to problems which are solvable on classical devices because they’re charlatans. \n\n- error correction: I predict fault tolerance will have moved on a little bit, we’re pretty close to having an error corrected surface code now (though again, companies might tell you they have it now, looking you Google, they don’t, that’s a lie and we’re realistically about five to seven years away from having a chip which can real-time error correction in place), I expect there to be improvement in this area and by 2035 to have be able to actually do some basic three to five qubit circuits fault tolerantly.\n\n- compilation: this will help a number of things, I expect quantum compilers to be moving forward in the near future and hopefully in ten years this’ll be an effectively solved problem. I know that the QBI by DARPA has a strong focus on compilation which I hear there are some progress being made in Chicago with Fred Chong and in Australia with Simon Devitt on this. The smart money is obviously on Fred and their company, they have more money but Devitt is a gee, and some of the compilation stuff that Devitt’s group showed towards the end of DARPAs QB program was pretty impressive, we’ll see. \n\n- improvements to current algorithms: to reduce costs we need to understand costs. Cracking compilation will help there. Remember that all resource estimates that we can come up with now are upper bounds so hopefully with the Chong or Devitt compiler these can be improved upon.\n\n- genuinely new algorithms: I’m a little more pessimistic here because I just don’t believe there are many real problems that are in BQP but not BPP.",
+                "published_at": 1753619635.0,
+                "likes": 17,
+                "subcomments": [
+                    {
+                        "author": "BVAcupcake",
+                        "comment": "Great answer, thank you!",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "joaquinkeller",
+                        "comment": "Indeed we do not have many algorithms with super polynomial advantage, basically besides Shor's algorithm we have nothing. \n\nQuantum chemistry and quantum simulation are still a \"hope\". Quantum machine learning is embryonic and might never become a thing (classical machine learning is already super good). Optimization has believers but needs real quantum computers to empirically check its usefulness (if any).\n\nI predict that in ten years there will 10x more research in quantum algorithms than today, driven by the despair of having quantum computers but nothing to run on them. A degree in maths or CS is a good choice to do research in this area.",
+                        "published_at": 1,
+                        "likes": 1
+                    },
+                    {
+                        "author": "Upset-Government-856",
+                        "comment": "Without new useful algorithms they are just more of a research tool, and I guess a way for intelligence organizations to break old encryption records they have stockpiled up.",
+                        "published_at": 1,
+                        "likes": 1
+                    },
+                    {
+                        "author": "gott3rd4mmerung",
+                        "comment": "Google \\*does\\* have a working surface code implementation at the moment (Nature 638). It's not a lie.",
+                        "published_at": 1,
+                        "likes": 1
+                    },
+                    {
+                        "author": "Ok_Employment_192",
+                        "comment": "Hi hugh, I would like to ask you a question as it seems you know you're stuff. What's your opinion about analog quantum neural networks? My understanding is that in this case quantum error correction should be less concerning, but until we don't build one (with a size large enough that you can produce a classically intractable output) no one can really say what it could be useful for. Which is something I find somehow fascinating.",
+                        "published_at": 0,
+                        "likes": 0
+                    }
+                ]
+            },
+            {
+                "author": "BVAcupcake",
+                "comment": "I m starting my bachelor this october and i m thinking about doing a master in quantum computing afterwards, that ll be in about 4 years from now",
+                "published_at": 1753615822.0,
+                "likes": 6,
+                "subcomments": [
+                    {
+                        "author": "BitcoinsOnDVD",
+                        "comment": "Bachelor in what?",
+                        "published_at": 3,
+                        "likes": 3
+                    }
+                ]
+            },
+            {
+                "author": "mayank1234cmd",
+                "comment": "\\- Post-quantum cryptographic algorithms will probably be standardized and their research less open than before (Kyber/Dilithium is the new AES/PGP)  \n\\- Quantum advantages in QML might be demonstrated in niche scenarios?  \n\\- Quantum algorithms cracking 6-round AES may be achieved but kept private  \n\\- NISQ devices become more stable  \n\\- Quantum simulations (QML rebranded?) for drug discovery (speedups?)",
+                "published_at": 1753641208.0,
+                "likes": 5,
+                "subcomments": []
+            },
+            {
+                "author": "ponyo_x1",
+                "comment": "Hugh’s answer is pretty good. I’d guess we have QCs with a few thousand qubits, running small surface codes with gates getting logical errors down to like 10^-8(?) and a few dozen logical qubits. This would be really good! I also expect better resource estimation of algorithms, some improvements and one new actually good idea for a new algo. On the flip side, I could see some new physical phenomena arise that becomes a difficult hurdle for companies to cross. Also I bet like half of the companies go broke in 10 years because not enough progress is made",
+                "published_at": 1753642738.0,
+                "likes": 4,
+                "subcomments": []
+            },
+            {
+                "author": "golanor",
+                "comment": "Neutral atoms will probably crack 256 bit elliptic curve cryptography ",
+                "published_at": 1753638839.0,
+                "likes": 4,
+                "subcomments": [
+                    {
+                        "author": "BVAcupcake",
+                        "comment": "interesting",
+                        "published_at": 0,
+                        "likes": 0
+                    }
+                ]
+            },
+            {
+                "author": "Fair_Control3693",
+                "comment": "Probably, it will be where classical computers were in the late 1950s:  Exotic technology, not very many jobs, really good career IF you can get into the field.\n\nAs a practical matter, you will need to have a PhD from a Big-Name school to have a career in this field.\n\nI notice that most of the answers focus on things like Error Correction,  NISQ, etc.  This is not relevant.  The real issues are that:\n\n1. Progress has been painfully slow.  Major funding agencies have been holding conferences to discuss \"Should we cut our losses on this Quantum Computer stuff?\"  I was invited to one such meeting last year, in Alexandria, VA.\n\n2. The \"We only hire PhDs with a relevant thesis topic\" mentality is getting worse, not better.  The field is turning into a club, and the fact that we already have too many PhDs being produced does not help.\n\n3. I could be wrong about this.  A breakthrough could arrive out of Left Field tomorrow, but that is not the way to bet.  Even if , say, Psi Quantum manages to build a System-360 type Quantum Computer which creates thousands of jobs for Quantum Computer Programmers, the whole field would still be rather small.",
+                "published_at": 1753710407.0,
+                "likes": 2,
+                "subcomments": [
+                    {
+                        "author": "algebruuhhh",
+                        "comment": "source on 1?",
+                        "published_at": 2,
+                        "likes": 2
+                    }
+                ]
+            },
+            {
+                "author": "Friendly_Ear_1205",
+                "comment": "Qubit packages on a subscription model will be available to everyone.\n\nYou will be able to access a QC over the internet (whatever that becomes web3 etc) and  qubits will come down in price.\n\nSchools, universities, pharmaceutical companies, will subscribe to what they need and never have to front the cost of building, owning and running the machine.\n\nThe math works out now to build a QC and start this process to get ahead of the curve.\n\nBy 2035 I would expect 5 qubits to be £4.99 a month.\n20 qubits would be £15.99.\nlarge corporations and businesses would have cheaper rates due to quantity.\n\n5 qubits will be more than enough for the average Joe, when buying a new laptop, gaming device, pc, I would guess that similar to the cloud that you will get so much access for free and then onto a rolling subscription.\n\nUsing this method of accessibility will allow for the price to fall rapidly. Making QC the largest step forward since the microchip.\n\nTo access your banking online in 10 years I suspect that people will need to have access to QC for security. \n\nThere is no need to have a QC in your home.\nInternet speeds will continue to increase and qubits will become as common as the cloud.\n\nVideo game developers will build games and have QC part of the development. When buying a game in 10 years, a triple A game will be more expensive but include access to the qubits needed for the lifetime of the game. I expect an open world red dead redemption 3/4 to use QC to help simulate the game world, provide a real AI deployed in game. Red dead redemption 3/4 I would think would cost around £129.",
+                "published_at": 1753977541.0,
+                "likes": 2,
+                "subcomments": [
+                    {
+                        "author": "BVAcupcake",
+                        "comment": "This a really interesting take, didn t think of it like this",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "Positive_Minimum3468",
+                "comment": "As far as the quadrature of the circle.",
+                "published_at": 1753622140.0,
+                "likes": 2,
+                "subcomments": []
+            }
+        ]
+    },
+    {
+        "title": "70k bet against Quantum computing",
+        "url": "https://www.reddit.com/r/wallstreetbets/comments/1m05rkn/70k_bet_against_quantum_computing/",
+        "score": 882,
+        "comments_count": 319,
+        "author": "Delicious_Nature_280",
+        "created_utc": 1752545709.0,
+        "selftext": "Jensen literally said they were more \"instrument\" than \"computer\" and proceeded to laugh to their face for 2 hours. Not a single institution holds the stock other than for market making purposes, only monkeys with a robinhood account. Easiest money I'll ever make. Bookmark this post.\n\nhttps://preview.redd.it/k5t6qyw76ycf1.png?width=1376&format=png&auto=webp&s=12305c60bbed573ad13af6f445b7dd903f3c00d9\n\n",
+        "comments": [
+            {
+                "author": "AdOrnery4151",
+                "comment": "Betting against QUBT and RGTI in 2025 is like shorting tulips in 1637. You’re either a genius or broke next week. No in-between.",
+                "published_at": 1752545917.0,
+                "likes": 1198,
+                "subcomments": [
+                    {
+                        "author": "Velghast",
+                        "comment": "1630's Tulip Futures must have been wild.",
+                        "published_at": 303,
+                        "likes": 303
+                    },
+                    {
+                        "author": "Delicious_Nature_280",
+                        "comment": "No worries I still have plenty of money to double down if necessary by inversing r/wallstreetbets [a year ago](https://www.reddit.com/r/wallstreetbets/comments/1f2x0d1/the_next_tech_giant_why_hood_pltr_and_dkng_are/)",
+                        "published_at": 103,
+                        "likes": 103
+                    },
+                    {
+                        "author": "Unknown",
+                        "comment": "[deleted]",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "Learner_Mentor",
+                        "comment": "When quantum computing becomes useful utility, its the IBM, Google, MSFT or someone like that would make it possible not QUBT,RGTI. In fact, all of this rally has started after Google announced. It’s Willow and continued after Microsoft announced majorana not because some QUBT or RGTI came up with some breakthrough",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "Ill_Cancel4937",
+                "comment": "Careful. The price of these kinds of meme/movement stocks and assets isn’t dictated by what the average market participant thinks its worth, it’s dictated by what the most fanatic retard will pay for it. I’m sure you know it’s risky and you are right they aren’t worth anything near their current market caps. But unless the whole market turns bad you will probably lose money.",
+                "published_at": 1752546000.0,
+                "likes": 335,
+                "subcomments": [
+                    {
+                        "author": "Invest0rnoob1",
+                        "comment": "G7 a month ago announced that they were investing in quantum, but I'm sure this guy knows.",
+                        "published_at": 38,
+                        "likes": 38
+                    },
+                    {
+                        "author": "WearyHoney1150",
+                        "comment": "Nah were going into august. This is a good bet",
+                        "published_at": 15,
+                        "likes": 15
+                    },
+                    {
+                        "author": "Alternative_Kiwi9200",
+                        "comment": "Quantum isn't meme. Its a sensible asymmetric hedge. The likelihood is that usable quantum computers are a long way off or may never happen.  \n  \nBUT  \n  \nThere is a small chance they upturn everything and change everything, and render conventional computing comical. I have a small (<5% portfolio) bet on quantum, just in case thats true.\nI expect it to amount to nothing, but there is a 1% chance it 200x...",
+                        "published_at": 5,
+                        "likes": 5
+                    }
+                ]
+            },
+            {
+                "author": "GVtt3rSLVT",
+                "comment": "https://preview.redd.it/n0ixx6258ycf1.jpeg?width=1179&format=pjpg&auto=webp&s=b463bc26e0c2c378d8ca38838a925f09049ca4f7",
+                "published_at": 1752546370.0,
+                "likes": 250,
+                "subcomments": [
+                    {
+                        "author": "freebaseclams",
+                        "comment": "Holy fuck, did Robert De Niro actually say this??",
+                        "published_at": 128,
+                        "likes": 128
+                    }
+                ]
+            },
+            {
+                "author": "ImmoKnight",
+                "comment": "Considering the Nvidia news... \n\nThis seems like a really really unfortunately timed bet.",
+                "published_at": 1752545875.0,
+                "likes": 181,
+                "subcomments": [
+                    {
+                        "author": "TheRealL4W",
+                        "comment": "What news? Im deep in QBTS.... Give me hope!",
+                        "published_at": 37,
+                        "likes": 37
+                    },
+                    {
+                        "author": "daslyvillian",
+                        "comment": "This!!!! OP is right but the market is not logical.",
+                        "published_at": 3,
+                        "likes": 3
+                    }
+                ]
+            },
+            {
+                "author": "Ill_Awareness6706",
+                "comment": "I don’t know what quantum computing does, but I know -$70,000 when I see it. LFG",
+                "published_at": 1752546032.0,
+                "likes": 143,
+                "subcomments": [
+                    {
+                        "author": "Icy_Marionberry7286",
+                        "comment": "It's a short. The losses won't just stop at 70k.",
+                        "published_at": 79,
+                        "likes": 79
+                    },
+                    {
+                        "author": "Brokenandburnt",
+                        "comment": "It doesn't do anything besides lose money at the moment. And probably foreseeable future.",
+                        "published_at": 8,
+                        "likes": 8
+                    }
+                ]
+            },
+            {
+                "author": "Your_friend_Satan",
+                "comment": "My wife works in quantum computing.  When I asked her about these companies, she laughed at them and their “products” or lack thereof and said they won’t hardly be viable in ~5-years.  Her company has poached all of their top talent.  The stocks have all literally 10x since we had that conversation… so you might be right, but god help you if you’re early, which I think you are.",
+                "published_at": 1752556568.0,
+                "likes": 65,
+                "subcomments": [
+                    {
+                        "author": "stackin_neckbones",
+                        "comment": "I was involved in quantum at a fang company since 6 years ago.  Complete money pit run by head in the clouds academics who have never produced anything practical. One told me back then that the most likely outcome is they work on it for 10 years and get no where.  It’s proved to be exactly true.  Btw these scientists are paid millions per year in some cases",
+                        "published_at": 34,
+                        "likes": 34
+                    },
+                    {
+                        "author": "not_a_cumguzzler",
+                        "comment": "does your wife work at google or ibm?",
+                        "published_at": 17,
+                        "likes": 17
+                    },
+                    {
+                        "author": "SkyHook42",
+                        "comment": "Ahh, the good old \"my company is awesome, the competitors are all fools!\" never heard that before.\nDoes she work at Intel?",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "Snoo-95676",
+                "comment": "Is this you Pharma Bro?",
+                "published_at": 1752547046.0,
+                "likes": 52,
+                "subcomments": [
+                    {
+                        "author": "Automatic-Ferret-403",
+                        "comment": "He has way more than 70K in the short lmao",
+                        "published_at": 3,
+                        "likes": 3
+                    }
+                ]
+            },
+            {
+                "author": "figlu",
+                "comment": "Everything pumping right now a picture of a brick is 180k",
+                "published_at": 1752546026.0,
+                "likes": 45,
+                "subcomments": [
+                    {
+                        "author": "yirtletirtle",
+                        "comment": "NFT is back?",
+                        "published_at": 20,
+                        "likes": 20
+                    }
+                ]
+            },
+            {
+                "author": "caughtinthought",
+                "comment": "QBTS is literally a fraud company and I've lost a few thousand on puts on two separate occasions... it seems like the market literally does not give a fuck about the actual science/product",
+                "published_at": 1752546256.0,
+                "likes": 43,
+                "subcomments": [
+                    {
+                        "author": "Delicious_Nature_280",
+                        "comment": "Canadian company with a CEO sipping martinis in Miami. Can't wait for august 5 earnings.",
+                        "published_at": 20,
+                        "likes": 20
+                    },
+                    {
+                        "author": "SerratiaM",
+                        "comment": "Can you elaborate? Maybe it's not too late for me to find exit liquidity",
+                        "published_at": 8,
+                        "likes": 8
+                    }
+                ]
+            },
+            {
+                "author": "Unknown",
+                "comment": "[deleted]",
+                "published_at": 1752550548.0,
+                "likes": 39,
+                "subcomments": [
+                    {
+                        "author": "I_am_Nerman",
+                        "comment": "literate whole fact tart tidy birds deserve oil squash languid",
+                        "published_at": 9,
+                        "likes": 9
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Which quantum computing stocks do you think have the most potential?",
+        "url": "https://www.reddit.com/r/investing/comments/1lqxyyj/which_quantum_computing_stocks_do_you_think_have/",
+        "score": 27,
+        "comments_count": 75,
+        "author": "cleanbeandream",
+        "created_utc": 1751569521.0,
+        "selftext": "I had my eye on companies such as QUBT, RGTI, and IONQ around 6 months ago before the pop on the sector. Which quantum computing companies do you see being industry leaders or having the highest potential for success? \n\nOn the flip side, if you have an opinion on this, which company do you think is the least competitive in the sector? ",
+        "comments": [
+            {
+                "author": "schlomow1",
+                "comment": "Google: I don’t know of another company that since years is that heavily invested in quantum computing and yet can effort not to succeed. \nBesides, they uniquely will be able to implement quantum computing into their products.",
+                "published_at": 1751571293.0,
+                "likes": 47,
+                "subcomments": [
+                    {
+                        "author": "groceriesN1trip",
+                        "comment": "IBM would be the only other one",
+                        "published_at": 11,
+                        "likes": 11
+                    }
+                ]
+            },
+            {
+                "author": "phosphate554",
+                "comment": "None",
+                "published_at": 1751570401.0,
+                "likes": 26,
+                "subcomments": [
+                    {
+                        "author": "GamblingMan420",
+                        "comment": "Exactly this. If we had a perfectly capable quantum supercomputer magically appear, there is absolutely nothing we could do with it. Not even to mention the physics related hurdles we have to cross just to build a well function QC. It’s a solution in search of problems.",
+                        "published_at": 10,
+                        "likes": 10
+                    }
+                ]
+            },
+            {
+                "author": "Any-Cup8629",
+                "comment": "I just invest in QTUM",
+                "published_at": 1751569632.0,
+                "likes": 15,
+                "subcomments": [
+                    {
+                        "author": "StrategicPotato",
+                        "comment": "Fr this is the way lol. You’re not going to be able to predict a winner with 10x returns AND dump a ton into it at the right time unless you’re both lucky and consistently very well informed.",
+                        "published_at": 3,
+                        "likes": 3
+                    },
+                    {
+                        "author": "patGmoney",
+                        "comment": "I agree. For now it is a good safe bet across the sector",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "LazyTheKid11",
+                "comment": "lol i bought QUBT when it was at 60 cents a share, rose to 70 cents, took profit, sold it all and put it into NVDA. like a month or two later it went to $25/share. lesson learned, unless you see no value, just sell half of your position and let the other half ride",
+                "published_at": 1751571477.0,
+                "likes": 15,
+                "subcomments": [
+                    {
+                        "author": "Kryptus",
+                        "comment": "How many shares did you have?",
+                        "published_at": 3,
+                        "likes": 3
+                    },
+                    {
+                        "author": "logisticalgummy",
+                        "comment": "Hindsight is 20/20. These compare could very well never reach their current levels too",
+                        "published_at": 3,
+                        "likes": 3
+                    },
+                    {
+                        "author": "Fun-Personality-8008",
+                        "comment": "Yeah, still kicking myself for selling my $1k of NVDA in 2005",
+                        "published_at": 3,
+                        "likes": 3
+                    }
+                ]
+            },
+            {
+                "author": "ElectricalSystem1761",
+                "comment": "I couldn’t decide so I made a Quantum Race pie with QBTS, IBM, IONQ, QUBT and RGTI. All doing well so far.",
+                "published_at": 1751570796.0,
+                "likes": 14,
+                "subcomments": [
+                    {
+                        "author": "GandalfTheSexay",
+                        "comment": "Tasty 😋",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "cleanbeandream",
+                        "comment": "Sweet",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "-Sanj-",
+                        "comment": "What about ARQQ?",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "Hot_Ad_2054",
+                        "comment": "Don't forget to add ARQQ to the list. It's unique in its own way.",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "SnooSketches5403",
+                "comment": "IBM",
+                "published_at": 1751580035.0,
+                "likes": 8,
+                "subcomments": []
+            },
+            {
+                "author": "DerpSkeeZy",
+                "comment": "HON and IBM.",
+                "published_at": 1751574051.0,
+                "likes": 7,
+                "subcomments": [
+                    {
+                        "author": "ElectricalSystem1761",
+                        "comment": "Hadn’t seen HON before so thanks for this. Just had a good look into them and placed an order for Monday market opening",
+                        "published_at": 3,
+                        "likes": 3
+                    }
+                ]
+            },
+            {
+                "author": "Jlaybythebay",
+                "comment": "IonQ. Do it",
+                "published_at": 1751579696.0,
+                "likes": 7,
+                "subcomments": [
+                    {
+                        "author": "cleanbeandream",
+                        "comment": "😂 I may have to",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "Unknown",
+                "comment": "Depends on how you look at it. \n\nI have $QUBT, $QBTS, and $RGTI (and $QNCCF, $BKYI, heck even $SCPCF) and I bought between $1-$1.30ish, so I think they are great!\n\n$LAES and $WKEY just launched a quantum based satellite (for ensuring secure communications) aboard a SpaceX Falcon9 rocket, so when people tell you the tech is going nowhere…it just went into space!\n\nOh, and they are using the $NVDA backed $HBAR Hedera cryptocurrency and blockchain.",
+                "published_at": 1751575374.0,
+                "likes": 6,
+                "subcomments": [
+                    {
+                        "author": "cleanbeandream",
+                        "comment": "Thank you sir. I’m actually invested in HBAR 👍",
+                        "published_at": 2,
+                        "likes": 2
+                    }
+                ]
+            },
+            {
+                "author": "Fun-Personality-8008",
+                "comment": "Google, IBM, and Honeywell will be the field leaders either organically or by acquisition. Buying Google now also gets you exposure to SpaceX.",
+                "published_at": 1751594374.0,
+                "likes": 5,
+                "subcomments": []
+            }
+        ]
+    },
+    {
+        "title": "Thoughts on Quantum Computing - from a Physicist",
+        "url": "https://www.reddit.com/r/wallstreetbets/comments/1jj9s02/thoughts_on_quantum_computing_from_a_physicist/",
+        "score": 1087,
+        "comments_count": 274,
+        "author": "fzy325",
+        "created_utc": 1742871772.0,
+        "selftext": "*New post, now with screenshot.*\n\nMy background: PhD student in Physics, working on quantum information on the theory side. I do know many friends that work on the experimental side, though.\n\nAs much as I appreciate the interest in my field over the last year or so, I personally think it's best to keep expectations realistic. Especially with some DD posts I have seen posting incomplete information, and even blatantly false statements (in Physics). I want to clear those up and some personal thoughts on some quantum computing startups.\n\n**Quantum communication doesn't allow for faster-than-light propagation of information**\n\nI have seen a DD post that says IonQ achieved faster than light communication via networked entanglement of particles. VERY common misconception about entanglement. Affecting one particle in a pair of entangled particles does not affect the other, it will just break the entanglement. It is proven to be impossible via the [no-communication theorem](https://en.wikipedia.org/wiki/No-communication_theorem).\n\n**Breaking Cryptography, more like breaking your portfolio as you baghold for 10-20 years**\n\nYes, Shor's algorithm is real. No, it won't be possible to break encryption until we get a quantum computer with at least 2000 qubits. The most optimal implementations  of Shor's algorithm requires around 2n qubits to factor an n-bit number.\n\nAs an example for RSA-1024, you'll need more than 2000 LOGICAL qubits. Factoring in error correction, which requires multiple PHYSICAL qubits to represent one single logical qubit, you'll most likely need upwards of 100k physical qubits before we can actually break real-world encryption. I personally see that taking at least 20 years, but some more optimistic estimates place it at 10 years.\n\n**IonQ**\n\nThere's many DD touting IonQ's lower error rates, longer lifetimes, and all-to-all connectivity. While all of these are true, they often forget to mention one drawback: the gate speeds.\n\nIt takes around a thousand times longer to execute an operation on trapped ion platforms compared to superconducting platforms (which Google, IBM uses). While finance/techbros that have never touched a quantum mechanics textbook will point to the fact that the lifetime of the qubit is at most on the order of 100 seconds, and think that quantum algorithms won't require more than that time anyways, so this shouldn't be an issue.\n\nHowever, keep in mind that the algorithms that are most likely to see real-world use are optimization algorithms like VQE and QAOA. These algorithms need to repeat the quantum circuit many, many times as they gradually change the parameters in the circuit to find the optimal set of solutions.\n\nFurthermore, if your circuit output is some continuous variable that's encoded into the probability of measuring one of the states, then you need to repeat the circuit upwards of thousands of time to get a good estimate of that probability.\n\nAs a conservative estimate for a simple optimization algorithm, let's say that you need 1000 repetitions of the circuit, each one taking 1000 repetitions to get the output, and each run of the circuit takes 1 second on a trapped ion computer. That takes 11 and a half days on a trapped ion computer, as compared to 17 minutes on a superconducting one. If we use a pay-by-the-minute model in the future for quantum computers, then IonQ likely has to charge less per minute, since you need more time to run an algorithm on their platform. Sure, they can charge a premium for the lower error rates, but if they charge the same amount per minute as superconducting platforms, then customers are likely to simplify the algorithm they want to run (to be more tolerant of errors) to get a solution at a thousandth of the price.\n\n**Rigetti**\n\nHonestly, looking at their spec sheets for their platforms, and comparing it to Google's and IBM's, I don't see them pulling ahead at any point. Their board also literally kicked out the original founder for (allegedly) being a prick in general.\n\n**QUBT**\n\nLiterally never seen any substantial work from them.\n\n**Positions:**\n\nhttps://preview.redd.it/8d3hedfi4rqe1.png?width=1080&format=png&auto=webp&s=f5c6f4e97de5dba5f0aa1ce08d44b6e959d16f03\n\n**Disclaimer**\n\nThis is not financial advice. I've literally got my portfolio tied up in RKLB and LUNR because I don't know anything about space outside of Kerbal Space Program. I don't invest in quantum because I know quantum. I invest in space because I don't know space. Someone please make a similar post about space to convince me that space is bad too so I'll finally put my money into VOO and QQQ.",
+        "comments": [
+            {
+                "author": "PorkTenderBoy",
+                "comment": "Just put the quarks in the bag lil bro",
+                "published_at": 1742873774.0,
+                "likes": 954,
+                "subcomments": [
+                    {
+                        "author": "fzy325",
+                        "comment": "I'll have you know I was promised vacuum field fluctuations behind the dumpster",
+                        "published_at": 646,
+                        "likes": 646
+                    }
+                ]
+            },
+            {
+                "author": "swahzey",
+                "comment": "In true quantum fashion, I have both calls and puts…simultaneously existing at once.",
+                "published_at": 1742876706.0,
+                "likes": 596,
+                "subcomments": [
+                    {
+                        "author": "Unknown",
+                        "comment": "Underrated comment, I have schrödingers gains… they might be there they might be not",
+                        "published_at": 152,
+                        "likes": 152
+                    },
+                    {
+                        "author": "are_videos",
+                        "comment": "except in this quantum realm you are at loss on both scenarios",
+                        "published_at": 13,
+                        "likes": 13
+                    },
+                    {
+                        "author": "spac420",
+                        "comment": "waiting for them to collide so i can finally get a solution for my regardness",
+                        "published_at": 6,
+                        "likes": 6
+                    },
+                    {
+                        "author": "thewheelsonthebuzz",
+                        "comment": "They’re called Qderrivatives and they’re very unstable outside of a highly controlled environment.",
+                        "published_at": 1,
+                        "likes": 1
+                    },
+                    {
+                        "author": "Suits_in_Utes",
+                        "comment": "Don’t forget to cool your device to below outer space",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "PensionAlarming9351",
+                "comment": "This regard seems different from the rest of us.",
+                "published_at": 1742874496.0,
+                "likes": 455,
+                "subcomments": [
+                    {
+                        "author": "LiteVisiion",
+                        "comment": "He's a quantum regard. We don't really know if he's a regard until the regardation function collapses and we see if he's holding the bags or not",
+                        "published_at": 651,
+                        "likes": 651
+                    },
+                    {
+                        "author": "JaxTaylor2",
+                        "comment": "It’s a whole new level of unstable decay distribution *ψ₀*",
+                        "published_at": 8,
+                        "likes": 8
+                    },
+                    {
+                        "author": "DeciduousMath12",
+                        "comment": "They not like us",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "Rad7221",
+                        "comment": "OMG lol’ed while drinking a freaking Pepsi for the first time and you don’t want to see my desk now 😂😂",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "Wrath_FMA",
+                "comment": "Great post, but we have a car company right now that just went up the value of every other car company combined, despite selling relatively few cars.",
+                "published_at": 1742876720.0,
+                "likes": 353,
+                "subcomments": [
+                    {
+                        "author": "EnsilZah",
+                        "comment": "Counterpoint - it's not a car company.\n\nHow can it be both a car company and not a car company?\n\nIt's a quantum car company.",
+                        "published_at": 179,
+                        "likes": 179
+                    },
+                    {
+                        "author": "DrElkSnout",
+                        "comment": "![img](emote|t5_2th52|27189)",
+                        "published_at": 24,
+                        "likes": 24
+                    }
+                ]
+            },
+            {
+                "author": "Mental_Ingenuity_310",
+                "comment": "Nerd! \n\nSeriously now no one cares, the thing people like to throw money out at the most is what they understand the least.\n\nPlease never post again, trying to educate this crowd of degenerates is wasting both our time\n\nJust put a bunch of rocket signs and the name of the ticker and I’ll give you an up vote next time",
+                "published_at": 1742872387.0,
+                "likes": 178,
+                "subcomments": [
+                    {
+                        "author": "fzy325",
+                        "comment": "You're absolutely right I threw my money into space stocks because I know jack shit about space",
+                        "published_at": 124,
+                        "likes": 124
+                    },
+                    {
+                        "author": "SilentSwine",
+                        "comment": "It's funny because it's true, people never invest in the companies they do understand because they know how overhyped it actually is. But the things they don't understand? To the moon!",
+                        "published_at": 20,
+                        "likes": 20
+                    },
+                    {
+                        "author": "Unknown",
+                        "comment": "pocket wakeful continue bake plants vast sort sink full sense",
+                        "published_at": 3,
+                        "likes": 3
+                    }
+                ]
+            },
+            {
+                "author": "owwul",
+                "comment": "Isn’t a physicist a guy that just prescribes pills and gives massages?",
+                "published_at": 1742878334.0,
+                "likes": 152,
+                "subcomments": [
+                    {
+                        "author": "fzy325",
+                        "comment": "Honestly that's what my barber thinks when I told him I was studying to be a Physicist since 5 years ago, and I still have not found the courage to correct him",
+                        "published_at": 125,
+                        "likes": 125
+                    }
+                ]
+            },
+            {
+                "author": "StyleFree3085",
+                "comment": "Good post to educate quantum regards ![img](emote|t5_2th52|4271)",
+                "published_at": 1742875321.0,
+                "likes": 42,
+                "subcomments": [
+                    {
+                        "author": "Unknown",
+                        "comment": "I'm not a physicist, but I did think that, why would   ion q or any of these quantum computing companies founded in the last decade, have a shot at beating larger companies who have the money to hire the best engineers and physicists \n\n(Ibm and google)\n\nBecause I had seen many of the newly established corporations used trapped ion technology \n\nWhile ibm and google used a different technology \nEven if I didn't know what the differences are.\n\nI think Google's market cap is too big to be a good investment \n\nMaybe investing in ibm is the move for anyone who wants to benefit from quantum computing?",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "PaperHands_BKbd",
+                "comment": "Has anyone tried a bond offering to buy more qubits? Maybe say they'll pay them back in future compute cash?\n\nAre they even trying if not?",
+                "published_at": 1742873689.0,
+                "likes": 26,
+                "subcomments": [
+                    {
+                        "author": "entropy_bucket",
+                        "comment": "I think klarna are offering but now pay later on qubits!",
+                        "published_at": 5,
+                        "likes": 5
+                    }
+                ]
+            },
+            {
+                "author": "Ja_Rule_Here_",
+                "comment": "You think you’re so smart, but I bet you don’t understand what happens when two black holes are quantum entangled to each other.",
+                "published_at": 1742878701.0,
+                "likes": 18,
+                "subcomments": [
+                    {
+                        "author": "fzy325",
+                        "comment": "That's how babies are made, right? At least that's what my parents told me",
+                        "published_at": 52,
+                        "likes": 52
+                    }
+                ]
+            },
+            {
+                "author": "itwasluck_71",
+                "comment": "What about Dwave?",
+                "published_at": 1742873420.0,
+                "likes": 14,
+                "subcomments": [
+                    {
+                        "author": "fzy325",
+                        "comment": "Their quantum annealing machines are only really good for discrete optimization problems, but they're pretty good at it. I do know that there may be some commercial applications for such problems, but it isn't universal.\n\nMy very unsubstantiated prediction is that they will likely capture a significant portion of the market initially, as they are probably going to be one of the first that's going to be useful for commercial applications. I see that dropping off as universal quantum computers get better and better, though.",
+                        "published_at": 40,
+                        "likes": 40
+                    },
+                    {
+                        "author": "Invest0rnoob1",
+                        "comment": "I’d only take someone seriously who actually works at one of these companies.",
+                        "published_at": -11,
+                        "likes": -11
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "ELI5: What is the big deal with quantum computers?",
+        "url": "https://www.reddit.com/r/explainlikeimfive/comments/1kjw5t7/eli5_what_is_the_big_deal_with_quantum_computers/",
+        "score": 113,
+        "comments_count": 96,
+        "author": "Jerswar",
+        "created_utc": 1746951778.0,
+        "selftext": "From what I understand, they will be able to calculate difficult equations FAR faster than current computers. Cool. But what is this actually useful for? I saw some scientist proclaim that quantum computing would solve food issues and lead to cancer cures.\n\nHow??",
+        "comments": [
+            {
+                "author": "Unknown",
+                "comment": "[removed]",
+                "published_at": 1746952730.0,
+                "likes": 206,
+                "subcomments": [
+                    {
+                        "author": "thank_burdell",
+                        "comment": "That’s a really good video.  Thanks!",
+                        "published_at": 10,
+                        "likes": 10
+                    },
+                    {
+                        "author": "drdildamesh",
+                        "comment": "This almost just sounds like multithreading.\n\nEdit: until I watched the rest and it was clear that it isn't.",
+                        "published_at": 4,
+                        "likes": 4
+                    },
+                    {
+                        "author": "EmergencyCucumber905",
+                        "comment": "Brian Greene also did a podcast episode with Scott Aaronson [Straight talk on Quantum Computing](https://youtu.be/AVYRW9Qdp7Q?si=tV-aneCe2wxZ0vw7) which is very accessible.",
+                        "published_at": 1,
+                        "likes": 1
+                    },
+                    {
+                        "author": "explainlikeimfive-ModTeam",
+                        "comment": "**Please read this entire message**\n\n---\n\nYour comment has been removed for the following reason(s):\n\n* [Top level comments](http://www.reddit.com/r/explainlikeimfive/wiki/top_level_comment) (i.e. comments that are direct replies to the main thread) are reserved for explanations to the OP or follow up on topic questions (Rule 3).\n\nLinks without your own explanation or summary are not allowed. A top-level reply should form a complete explanation in itself; please feel free to include links by way of additional context, but they should not be the only thing in your comment.\n\n---\n\nIf you would like this removal reviewed, please read the [detailed rules](https://www.reddit.com/r/explainlikeimfive/wiki/detailed_rules) first. **If you believe it was removed erroneously, explain why using [this form](https://old.reddit.com/message/compose?to=%2Fr%2Fexplainlikeimfive&subject=Please%20review%20my%20submission%20removal?&message=Link:%20https://www.reddit.com/r/explainlikeimfive/comments/1kjw5t7/-/mrpy06r/%0A%0A%201:%20Does%20your%20comment%20pass%20rule%201:%20%0A%0A%202:%20If%20your%20comment%20was%20mistakenly%20removed%20as%20an%20anecdote,%20short%20answer,%20guess,%20or%20another%20aspect%20of%20rules%203%20or%208,%20please%20explain:) and we will review your submission.**",
+                        "published_at": -2,
+                        "likes": -2
+                    },
+                    {
+                        "author": "Unknown",
+                        "comment": "[deleted]",
+                        "published_at": -17,
+                        "likes": -17
+                    }
+                ]
+            },
+            {
+                "author": "asyork",
+                "comment": "They can do math in entirely different ways than normal computers. This allows for some types of calculations to happen at exponentially faster rates (things that were considered impossible due to time constraints suddenly become simple). I'm sure there are a lot of very smart people putting together the formulas they want to run on quantum computers, but what we will actually be able to do with them once they are cost effective is yet to be seen. For now, people have been able to use creative methods to solve some problems with normal computers faster than existing quantum computers can manage, but that is expected to change as quantum computers improve and become affordable. And eventually people will come up with creative methods for quantum computers as well.\n\nOne thing we are already certain of is that solving the math used for many existing methods of encryption becomes trivial on a quantum computer. Many old, encrypted files and databases will suddenly be available to the world once quantum computers are affordable. Anything that has ever been leaked that was encrypted with most standard methods will be easily decrypted. There are certainly people holding onto piles of old data dumps, waiting for the day they can access them. Companies are slowly moving to encryption methods that we have not yet figured out how to quickly crack with quantum computers, but anyone who hasn't completed that by the time quantum computing is widely available is going to suffer. Also, due to the existence of old data dumps, anyone who hasn't changed their passwords in a while will be at risk regardless of updated encryption.\n\nHopes about solving real life issues in the world come down to predictions about what we will be able to model with the computers. They will very likely become standard for modeling molecular interactions of things involving both genetics and medicine, potentially leading to foods that grow more easily and cheaply and cures for all kinds of diseases.",
+                "published_at": 1746953006.0,
+                "likes": 77,
+                "subcomments": [
+                    {
+                        "author": "ElusiveGuy",
+                        "comment": "> One thing we are already certain of is that solving the math used for many existing methods of encryption becomes trivial on a quantum computer. Many old, encrypted files and databases will suddenly be available to the world once quantum computers are affordable. Anything that has ever been leaked that was encrypted with most standard methods will be easily decrypted.  \n\n\nNot really. \n\n\n*Asymmetric* encryption relying on prime factorisation or discrete logarithm problems is basically broken by Shor's algorithm. This includes RSA and ECC. \n\n\nBut most data isn't encrypted like that. Most data is encrypted with a symmetric algorithm such as AES. Shor's algorithm does not apply here. Instead, Grover's algorithm will have an impact, but it's not critical. Very broadly, AES-256's keyspace would go from 2^256 to 2^128, and AES-128 from 2^128 to 2^64.\n\n\nThe data most at risk in common use would be encrypted emails (PGP / S/MIME) and TLS / HTTPS traffic, including captured historical traffic. \n\n\nYour encrypted databases, ZIPs, bitlocker/truecrypt/dm-crypt'd drives? Those are fine.\n\n\n\ntl;dr: Most encrypted data at rest does not become significantly easier to decrypt. Some specific subsets might, especially captured data in transit.",
+                        "published_at": 64,
+                        "likes": 64
+                    },
+                    {
+                        "author": "nstickels",
+                        "comment": "> This allows for some types of calculations to happen at exponentially faster rates \n\nWhile this opinion is widely reported snd believed about quantum computers, it’s not true. Using big O notation, if an algorithm was O(N) for a standard computer, the best case is O(sqrt(N)) with quantum computers. The same is true if an algorithm was 0(N^2 ), now it would be O(N) with quantum computing. \n\nBasically quantum computers can solve these tasks in the square root of the time it takes for an algorithm on a traditional computer. While it could be argued that 1/2 is “an exponent”, most would agree that this isn’t the exponent they are talking about when saying “exponentially faster.”",
+                        "published_at": 7,
+                        "likes": 7
+                    },
+                    {
+                        "author": "Meep4000",
+                        "comment": "I'll add a good example - credit card data/passwords.  Outside of straight up data breaches, or social engineering, it is near impossible to \"hack\" a credit card or password not because a computer can't, but because it would take decades if not several decades for a computer to find the correct number/password.  So most modern security just relies on the fact that no one is going to plan a 100 year heist.  However with quantum computing these systems could theoretically be broken in minutes.",
+                        "published_at": 2,
+                        "likes": 2
+                    }
+                ]
+            },
+            {
+                "author": "Paaaaap",
+                "comment": "Claims about quantum computers are waaay over blown. The very far fetched idea that scientist was referring to is that quantum computers could possibly be used to simulate molecules therefore leading to the discovery of new drugs, new materials that would revolutionize technology. \n\nAt the same time, we don't know what the future holds for them and what they will actually do. No one predicted Minecraft when they wrote the first boolean algebra papers",
+                "published_at": 1746953044.0,
+                "likes": 26,
+                "subcomments": [
+                    {
+                        "author": "fhota1",
+                        "comment": "Quantum computing is gonna be the next \"AI\" or \"Blockchain\". Once we get it good there will be some interesting use cases where it will really improve those fields but for every 1 of those, there will be a dozen people making absurd claims about what it can do just so they can get money from venture capitalists who understand the tech even less than they do",
+                        "published_at": 8,
+                        "likes": 8
+                    },
+                    {
+                        "author": "Rodot",
+                        "comment": "They are good at certain kinds of operations and solving certain problems but they'll never replace classical computers. Analogous to GPUs which are very fast for certain applications but no one would use a GPU as a central processor. What they are most useful for is problems that can be represented as generalized eigenvalue problems which has applications in a ton of fields and is extremely useful, but those applications don't include things like running a web browser or a video game",
+                        "published_at": 2,
+                        "likes": 2
+                    }
+                ]
+            },
+            {
+                "author": "Kangie",
+                "comment": "A traditional (\"classical\") computer has a number of problems that could technically be solved using them, but the energy required to do so would boil the oceans, not to mention the amount of time that it will take (longer than the time currently elapsed since the big bang).\n\n\nA quantum computer is a bit different; there are a few classes, however one of the simplest to visualise is \"quantum annealing\" where the machine is configured with inputs and allowed to \"settle\" into a low energy state, and that state is the solution to the problem. You can repeat this a few times and come to a conclusion without needing to perform all of this intermediate steps, it's just a result of the way the system operates (See D-Wave).",
+                "published_at": 1746952218.0,
+                "likes": 13,
+                "subcomments": [
+                    {
+                        "author": "Raskai",
+                        "comment": "A quantum annealer isn't what people usually mean when they talk about quantum computers though. It's a different model of computation that is weaker than universal quantum computers and while it can still achieve some speedups (it can run Grover's algorithm for square root speedup for some problems) it can't run the likes of Shor's algortihm for example. That means it doesn't provide an exponential speedup for those problems like a normal quantum computer would.\n\nThey are also much easier to make, that's why you always see D-Wave have wildly more qubits in their \"quantum computers\" than anyone else.",
+                        "published_at": 3,
+                        "likes": 3
+                    }
+                ]
+            },
+            {
+                "author": "PM_me_PMs_plox",
+                "comment": "Quantum computers can theoretically break much of modern cryptography.  That's basically it, the usefulness of everything else is speculation.",
+                "published_at": 1746951877.0,
+                "likes": 11,
+                "subcomments": [
+                    {
+                        "author": "abrandis",
+                        "comment": "This there are maybe a few others. esoteric mathematical  advantages but it's really only Antony nalive rod use cases where it excels.",
+                        "published_at": 4,
+                        "likes": 4
+                    }
+                ]
+            },
+            {
+                "author": "Desperate-Lecture-76",
+                "comment": "Your first statement is completely incorrect. They have the potential to solve one family of problems much faster than regular computers but it hasn't been done yet and the only obvious practical use right now is cryptography.\n\nAnd I don't know who this \"scientist\" you mention is but it sounds like bs.",
+                "published_at": 1746952016.0,
+                "likes": 9,
+                "subcomments": []
+            },
+            {
+                "author": "tpasco1995",
+                "comment": "I'm going to go really basic with it.\n\nLet's say I give you an equation like y=35x^1.95890 and tell you to find all values of x for y being prime whole numbers through a trillion.\n\nYou (or a standard computer) will go through these millions of calculations one-by-one until you've found each solution.\n\nA quantum computer with enough qubits will simultaneously solve all of them in the same few compute steps. And actually, it's kind of calculating for all numbers and just returning correct solutions to your parameters.\n\nVAST oversimplification, but it can be carried into real-world solutions really quickly.\n\nCryptography is the big one. If you need the correct private key to break encryption, then you can either type in trillions of combinations of passwords, or you can just calculate every possible string at the same moment and see which one produces a matching hash through the encryption algorithm.\n\nMedicine will likely be changed by quantum computing of protein folding. If a medication is needed that bonds to a certain receptor on a certain cell, and we need to artificially produce a protein that's the correct folded shape, then calculating in reverse from every folded shape that fits to protein strings at once is much faster than individually testing proteins and hoping we find one that bonds correctly.",
+                "published_at": 1746965837.0,
+                "likes": 6,
+                "subcomments": [
+                    {
+                        "author": "nucumber",
+                        "comment": "> I'm going to go really basic with it.\n\nGood man.... \n\nYou read the room.",
+                        "published_at": 11,
+                        "likes": 11
+                    },
+                    {
+                        "author": "ORyantheHunter24",
+                        "comment": "What do you do for a living to understand QC AND protein folding as it relates to human health??\nAlso, I’m available for unpaid internships.",
+                        "published_at": 1,
+                        "likes": 1
+                    },
+                    {
+                        "author": "hyphenomicon",
+                        "comment": "This is completely wrong. Read Scott Aaronson.",
+                        "published_at": 0,
+                        "likes": 0
+                    }
+                ]
+            },
+            {
+                "author": "Unknown",
+                "comment": "[removed]",
+                "published_at": 1746954973.0,
+                "likes": 4,
+                "subcomments": [
+                    {
+                        "author": "Yellowspawn",
+                        "comment": "Why does this read like someone pushed the question in \"explain like I'm 5\" format into chatgpt and the AI took it literally",
+                        "published_at": 17,
+                        "likes": 17
+                    },
+                    {
+                        "author": "explainlikeimfive-ModTeam",
+                        "comment": "**Please read this entire message**\n\n---\n\nYour comment has been removed for the following reason(s):\n\n\n* The subreddit is not targeted towards literal five year-olds. \n\n\"**ELI5 means friendly, simplified and layman-accessible explanations.**\"\n\nThis subreddit focuses on simplified explanations of complex concepts.\n\nThe goal is to explain a concept to a layman.\n\n\"Layman\" does not mean \"child,\" it means \"normal person.\"\n\n---\n\nIf you would like this removal reviewed, please read the [detailed rules](https://www.reddit.com/r/explainlikeimfive/wiki/detailed_rules) first. **If you believe it was removed erroneously, explain why using [this form](https://old.reddit.com/message/compose?to=%2Fr%2Fexplainlikeimfive&subject=Please%20review%20my%20submission%20removal?&message=Link:%20https://www.reddit.com/r/explainlikeimfive/comments/1kjw5t7/-/mrq1hg1/%0A%0A%201:%20Does%20your%20comment%20pass%20rule%201:%20%0A%0A%202:%20If%20your%20comment%20was%20mistakenly%20removed%20as%20an%20anecdote,%20short%20answer,%20guess,%20or%20another%20aspect%20of%20rules%203%20or%208,%20please%20explain:) and we will review your submission.**",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "Fowlron2",
+                "comment": "There's different classes of difficulty, regarding how hard a math problem (more accurately here, algorithm, is to solve). Some are easy, like checking if a sudoku game is solved: just check if the numbers don't repeat. Those are polynomial problems. Some are really hard, like actually solving sudoku: that's a non polynomial problem.\n\nModern traditional computers cannot solve non-polynomial problems. Or, well, they can, but it takes a LOT of time and energy (a non polynomial amount, actually).\n\nQuantum computers work differently. They're no faster than traditional computers for the easy (polynomial) problems, but they're capable of solving certain hard (non-polynomial) problems in a reasonable time. \n\nBesides sudoku, some noteworthy non polynomial problems are protein folding (which would impact drug production for example), and the prime factoring problem (which would break cryptography).\n\nThey're not faster computers, they're computers that solve different problems, problems for which we currently have no reasonable solutions",
+                "published_at": 1746955977.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "_azazel_keter_",
+                "comment": "they're very good at problems where it's hard to find the solution, but easy to check which solution is right. They're also WAY overhyped in a big way. Odds are no normal day to day use will ever come from quantum computers, but they do allow a lot of interesting new algorithms and novel solutions to problems that we couldn't previously brute force",
+                "published_at": 1746965414.0,
+                "likes": 1,
+                "subcomments": []
+            }
+        ]
+    },
+    {
+        "title": "Where do you think quantum computing will be at in 2030?",
+        "url": "https://www.reddit.com/r/QuantumComputing/comments/1lxc8wh/where_do_you_think_quantum_computing_will_be_at/",
+        "score": 30,
+        "comments_count": 29,
+        "author": "TheTortoise3636",
+        "created_utc": 1752253269.0,
+        "selftext": "I know it’s hard to predict since the research being done is so rapid. Will there be new subfields? Will there be massive advancements that we can’t even predict? What do yall think?",
+        "comments": [
+            {
+                "author": "sg_lightyear",
+                "comment": "We may have a few logical qubits with universal logical gate operations demonstrated by a few hardware modalities. Quantinuum (ions) , QuEra (atoms) and Google (Transmon) if I had to put my money on. \nStill far from utility scale which will require 100-200 logical qubits at least.",
+                "published_at": 1752259850.0,
+                "likes": 18,
+                "subcomments": [
+                    {
+                        "author": "NebulaGlobal5312",
+                        "comment": "Wrong. ",
+                        "published_at": 0,
+                        "likes": 0
+                    }
+                ]
+            },
+            {
+                "author": "Unknown",
+                "comment": "[deleted]",
+                "published_at": 1752255426.0,
+                "likes": 15,
+                "subcomments": [
+                    {
+                        "author": "Numerous_Heart_7837",
+                        "comment": "So all the quantum stocks are extremely over valued right now ?     A current bubble",
+                        "published_at": 5,
+                        "likes": 5
+                    },
+                    {
+                        "author": "Apprehensive_Tea9856",
+                        "comment": "Eh, it will be here, but I think the use cases will be very limited. IBM seems to have some decent hardware, but they seem to be panicing about where to use it. Aka they need quantum advantage. Cases where it will beat classical computing, but with 500 qbits and not 1 million",
+                        "published_at": 3,
+                        "likes": 3
+                    },
+                    {
+                        "author": "Normal_Imagination54",
+                        "comment": "As always",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "cosmic_timing",
+                        "comment": "Try 2",
+                        "published_at": 2,
+                        "likes": 2
+                    }
+                ]
+            },
+            {
+                "author": "cosmic_timing",
+                "comment": "Optical. Fridge based computers are gonna be on the outs",
+                "published_at": 1752338814.0,
+                "likes": 8,
+                "subcomments": []
+            },
+            {
+                "author": "0xB01b",
+                "comment": "I will have solved it.",
+                "published_at": 1752272878.0,
+                "likes": 5,
+                "subcomments": []
+            },
+            {
+                "author": "Hofi2010",
+                "comment": "In 2030 we will be not that much further as we are now when it comes to Quantum Computing. Just my opinion as nobody knows if we get the current problems under control that preventing us from wide scale adoption.",
+                "published_at": 1752365213.0,
+                "likes": 3,
+                "subcomments": []
+            },
+            {
+                "author": "Life-Win-2063",
+                "comment": "I think as soon as we hear that a quantum computer is connected to, and working in tandem, with a classic computer on AI training, etc. we may see prices elevate.  Earnings for the companies will be key.  It’ll be interesting to see what the big boys like IBM Google and Microsoft will be working on.",
+                "published_at": 1752324179.0,
+                "likes": 2,
+                "subcomments": []
+            },
+            {
+                "author": "Expensive-Award1965",
+                "comment": "it will be at 2030",
+                "published_at": 1752299017.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "Lucian_Rahl",
+                "comment": "It's the same pattern with lidar from 2014.",
+                "published_at": 1752467406.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "Trick_Procedure8541",
+                "comment": "I think the photonic fusion compute based companies are gonna do the way of theranos. bosons are too hard to work with \n\n  \nI think superconductors will be replaced by spin qubits for large scale noisy compute \n\n  \ntrapped ions with EM control will rule for quantum compute with fault tolerance assuming they stop losing ions during transport \n\n  \nwell have 10,000 logical qubits but maybe have not crossed the 1M gate theshold yet while we solve  errors from the environment",
+                "published_at": 1752614844.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "fasi_s",
+                "comment": "These stocks will skyrocket within a 1-2 years…..don’t sleep on this folks",
+                "published_at": 1752986526.0,
+                "likes": 1,
+                "subcomments": []
+            }
+        ]
+    },
+    {
+        "title": "Google and IBM believe first workable quantum computer is in sight",
+        "url": "https://archive.is/ubW5q",
+        "score": 319,
+        "comments_count": 44,
+        "author": "GamingDisruptor",
+        "created_utc": 1755032979.0,
+        "selftext": "\"So far, only Google has demonstrated a quantum chip capable of performing error correction as its size increases. According to Kelly, any company trying to scale up without first reaching this point would end up with “a very expensive machine that outputs noise, and consumes power and a lot of people’s time and engineering effort and does not provide any value at all”. \n\nOthers, however, have not slowed their attempts to scale, even though none has yet matched Google.\"",
+        "comments": [
+            {
+                "author": "Tobxes2030",
+                "comment": "They've been believing this for the past 10 years.",
+                "published_at": 1755037474.0,
+                "likes": 93,
+                "subcomments": [
+                    {
+                        "author": "Saint_Nitouche",
+                        "comment": "It's always ten years away. Until it isn't.",
+                        "published_at": 32,
+                        "likes": 32
+                    }
+                ]
+            },
+            {
+                "author": "Iunlacht",
+                "comment": "I do research in the field, and while I think it’s important, the headlines are all buzz, almost all of the time. Personally, I don’t think we’ll see a quantum computer capable of achieving any practical task before 10 years in the future.\n\nALSO, people seem to think quantum computers will solve a bunch of problems by “just doing everything in parallel”. That’s not how it works. They’ll be good at doing a few select but important tasks. One of the bigger ones is it will break most of the current “classical” encryption techniques, and allow companies and governments to steal more of your data.",
+                "published_at": 1755033988.0,
+                "likes": 36,
+                "subcomments": [
+                    {
+                        "author": "Jamtarts-1874",
+                        "comment": "Do you think advances in AI over the next 10 years could shorten that 10-year prediction?",
+                        "published_at": 5,
+                        "likes": 5
+                    },
+                    {
+                        "author": "Much-Seaworthiness95",
+                        "comment": "That's such a needlessly narrow and pessimistic scope of what quantum computers can do, Jesus Christ.",
+                        "published_at": 1,
+                        "likes": 1
+                    },
+                    {
+                        "author": "Hungry_Difficulty527",
+                        "comment": "You don't sound like you do research in this field at all.",
+                        "published_at": -15,
+                        "likes": -15
+                    }
+                ]
+            },
+            {
+                "author": "Unknown",
+                "comment": "[deleted]",
+                "published_at": 1755037696.0,
+                "likes": 22,
+                "subcomments": [
+                    {
+                        "author": "Unknown",
+                        "comment": "[deleted]",
+                        "published_at": -2,
+                        "likes": -2
+                    }
+                ]
+            },
+            {
+                "author": "Fair_Horror",
+                "comment": "I think people are expecting a general purpose computer. They are going to be seriously disappointed when they realise that it can only do very specific things that are if use to a tiny amount of people. ",
+                "published_at": 1755050855.0,
+                "likes": 21,
+                "subcomments": [
+                    {
+                        "author": "not_hairy_potter",
+                        "comment": "The very specific thing it can do is downright terrifying. Imagine if Google had the power to decrypt modern encryption protocols.",
+                        "published_at": 14,
+                        "likes": 14
+                    }
+                ]
+            },
+            {
+                "author": "FarrisAT",
+                "comment": "Another Google $1 trillion options call",
+                "published_at": 1755044815.0,
+                "likes": 3,
+                "subcomments": []
+            },
+            {
+                "author": "Acceptable-Status599",
+                "comment": "I gorge.",
+                "published_at": 1755037182.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "Error_404_403",
+                "comment": "Did they ask Chinese scientists before expressing the belief? Form them, it might also be in sight -- in hindsight.",
+                "published_at": 1755071308.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "soggy_bert",
+                "comment": "Do people just hate technological advancements? Wtf is with all the doomposting",
+                "published_at": 1755406681.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "samosama",
+                "comment": "Exciting in the context of possible future cloud access to hybrid quantum computing",
+                "published_at": 1755034730.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "TampaBai",
+                "comment": "There is no such thing as a workable \"quantum computer.\"  It's just a classical computer using error correction and some fancy terminology to fool investors.  Solve the P, Np problem, or model the informational content of a black hole.  Never going to happen.",
+                "published_at": 1755058476.0,
+                "likes": -2,
+                "subcomments": []
+            }
+        ]
+    },
+    {
+        "title": "What do you think about quantum computing does it have potential?",
+        "url": "https://www.reddit.com/r/investing/comments/1ly7i77/what_do_you_think_about_quantum_computing_does_it/",
+        "score": 1,
+        "comments_count": 35,
+        "author": "kokotnakole",
+        "created_utc": 1752344995.0,
+        "selftext": "I'm interested in hearing other people's opinions because I've seen a lot of mixed views here on Reddit, but most of them were from around 5 months ago. What do you think now? Which stocks would you recommend? I've been focusing on RGTI and it doesn't look bad.\n",
+        "comments": [
+            {
+                "author": "InvisibleEar",
+                "comment": "I expect them to make progress on a million qbit computer slightly faster than we've made progress on cold fusion.",
+                "published_at": 1752349550.0,
+                "likes": 24,
+                "subcomments": []
+            },
+            {
+                "author": "Unknown",
+                "comment": "Quantum computing is HARD and we are still much further away from it than companies claim. Remember, companies in the space need investor money and have every incentive to over hype their progress. Sadly that's a common theme across the market as there seems to be only upside and no downside to companies doing this, it's really messed up.\n\nAnyway, investing in quantum computing companies now is the equivalent of going to a casino. Ie you're far more likely to loose money than gain. Have fun lolz",
+                "published_at": 1752346329.0,
+                "likes": 14,
+                "subcomments": [
+                    {
+                        "author": "kokotnakole",
+                        "comment": "What about the DARPA concract?",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "ForgetTheRuralJuror",
+                "comment": "Quantum computing has a lot of theoretical potential, but so does/did neuromorphic computing, analog computing, optical computing.\n\nIt could turn out that the juice isn't worth the squeeze with quantum.\n\nThe only thing more speculative than quantum computing’s long-term usefulness is betting on which company will be the one to actually crack it.",
+                "published_at": 1752392035.0,
+                "likes": 6,
+                "subcomments": []
+            },
+            {
+                "author": "rugerduke5",
+                "comment": "Quantum was 5-10years away 10 years ago.  Nonetheless, I am in IONQ & QBTS. QBTS just ended an ATM offering at an average price of 15.33, and IONQ just did a 1billion dollar private placement for $55.49 with Warrents at 99.39.  so do with this info. what you want",
+                "published_at": 1752346841.0,
+                "likes": 5,
+                "subcomments": []
+            },
+            {
+                "author": "gizmole",
+                "comment": "In 10-15 years",
+                "published_at": 1752346105.0,
+                "likes": 2,
+                "subcomments": [
+                    {
+                        "author": "Johnny_Monsanto",
+                        "comment": "Thats the same thing they said 10-15 years ago.",
+                        "published_at": 5,
+                        "likes": 5
+                    },
+                    {
+                        "author": "ufc2021",
+                        "comment": "thats silly to think with A.I and AGI on the way if you think about it once AGI gets its hands on quantum it might just be over for us im not gone get into to many details but we are moving towards a very unique future",
+                        "published_at": -1,
+                        "likes": -1
+                    }
+                ]
+            },
+            {
+                "author": "patchate",
+                "comment": "Speaking purely on the technology, there hasn't been much progress on the hardware since I last looked at it during college 25 years ago.\n\nThe basic fact of the matter is, superconducting temperatures are a requirement in order to operate with qubits for quantum computers; unless everyone can afford to keep a well stocked tank of liquid nitrogen or liquid helium in his or her backyard, I don't see quantum stuff exploding into retail anytime soon...",
+                "published_at": 1752401689.0,
+                "likes": 2,
+                "subcomments": [
+                    {
+                        "author": "Pleasant-Shallot-707",
+                        "comment": "lol what? I think you should look again. The tech has advanced enough that we’re very near the threshold of a QC that will outperform a classical computer when using quantum algorithms.",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "napleonblwnaprt",
+                "comment": "It will be great, once it is scalable and cheap. If breakthroughs in other areas come, it will make QC much more viable. I'm in QTUM because I can't be assed to pick specific companies, and in cutting edge fields you often have a random company shooting up +200% and you've never heard of it l.",
+                "published_at": 1752347485.0,
+                "likes": 1,
+                "subcomments": [
+                    {
+                        "author": "Newbiewhitekicks",
+                        "comment": "Have you read QTUM perspective or seen the profile for the people that run it? It’s a high turnover, high ER, and it’s run by people that have zero experience in this sector. The ETF consists of memes and established names. That whole company is under 40yos making sector specific ETFs, which is cool, but you’re getting hoodwinked if you think QTUM is a shortcut into investing in quantum.",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "Spankynpetey",
+                "comment": "Eventually quantum computing or its hybrid will be a big advance in computational power. Photonic chips are here now. Which company? No guarantees but Quantum Computing, Inc. may be on the verge of monetizing photonic chips speed for hybrid computing, QUBT. RGTI is a player, but I think QBTS is closer to true profitability in quantum computing services. The only thing I would say for sure is, NVDA is probably going to either be partnered with the winner or swallow them whole.",
+                "published_at": 1752351851.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "zampyx",
+                "comment": "A little (q)bit yeah",
+                "published_at": 1752359723.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "G4M35",
+                "comment": "I've been accumulating a small position in QBTS, RGTI, QUBT, and IONQ. They did not go anywhere for a very long time, till relatively recently (I am up >20x). I continue to accumulate with my monthly buys. \n\nI can't believe the sector has not taken off more.\n\nIMO it's going to be a bumpy ride, but with a very positive outcome for the long-term investors.",
+                "published_at": 1752374939.0,
+                "likes": 1,
+                "subcomments": []
+            }
+        ]
+    },
+    {
+        "title": "Are we waiting for Quantum computing?",
+        "url": "https://i.redd.it/ojyx4a9st1ff1.jpeg",
+        "score": 39,
+        "comments_count": 22,
+        "author": "Kind-Chance8571",
+        "created_utc": 1753461668.0,
+        "selftext": "Why there are no ai startups in ap ? Are we waiting for Quantum computing to kick in ? What am I missing ",
+        "comments": [
+            {
+                "author": "Actual-Reach5423",
+                "comment": "AI startups can’t come out of nowhere, they need ecosystem (Talent and infrastructure in this case)\n\nThat’s precisely what AP govt is trying to do now",
+                "published_at": 1753463161.0,
+                "likes": 29,
+                "subcomments": []
+            },
+            {
+                "author": "Embarrassed_Kiwi1938",
+                "comment": "Bhayya quantum computing ante telsa asala? Leka edo words dorikayi kada ani vaadestunnara? \n\nYou are doing apples to oranges comparision in a vegetable garden. Nonsensical.",
+                "published_at": 1753464428.0,
+                "likes": 17,
+                "subcomments": [
+                    {
+                        "author": "Fun-Athlete2059",
+                        "comment": "Bro vellanthaa paytm mafia , yedo timepass ki posts vestharu anthe",
+                        "published_at": 9,
+                        "likes": 9
+                    },
+                    {
+                        "author": "Htnamus",
+                        "comment": "I understood the title to be rhetorical. The point is that AP doesn’t seem to be in the AI race at all.",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "Comprehensive_Sea919",
+                        "comment": "Simple question - When we don't even have tech service companies working from AP though more half of IT workforce in Hyderabad is from Andhra, Don't you think current government must try to get them to the state? What quantum computing companies are they talking about?",
+                        "published_at": -6,
+                        "likes": -6
+                    }
+                ]
+            },
+            {
+                "author": "MostNeighborhood68",
+                "comment": "We wait for watever is far into the future. Buying us as much time as possible for the vision to come true.",
+                "published_at": 1753466058.0,
+                "likes": 4,
+                "subcomments": []
+            },
+            {
+                "author": "Longjumping-Trip-247",
+                "comment": "Most of the startups choose the location based on their ideal customer locationd, ap lo evaru vunaru??? Caste kukalu/politican slaves kaka pothe",
+                "published_at": 1753468399.0,
+                "likes": 4,
+                "subcomments": []
+            },
+            {
+                "author": "Informal_Barnacle_22",
+                "comment": "వేరే రాష్ట్రంలో ఈ స్టార్టప్స్ స్టార్ట్ చేసిన వాళ్ళు ఎవరి శిష్యులో తెలుసా మీకు?",
+                "published_at": 1753494410.0,
+                "likes": 3,
+                "subcomments": []
+            },
+            {
+                "author": "FreshCalligrapher291",
+                "comment": "There is no one fix for all problems. \nYou try 100 different things and bet on multiple things and few of them works out . This is probably one such investment by Government which is good thing. \n\nRegarding quantum valley , All Ap government trying to do is creating basic eco system for it so that when and if that becomes huge AP already have a base and industry investment will grow . \n\nMost who complain about it here are either stupid or act stupid and talk as if entire life and revenue of AP is invested in this one project .",
+                "published_at": 1753476854.0,
+                "likes": 3,
+                "subcomments": [
+                    {
+                        "author": "InquisitiveSoul_94",
+                        "comment": "He is paid troll, so obviously nuvvu cheppidhi chevitodi chevi lo sankam uudhinatte.\n\nI am more worried about those folks falling for their propoganda. They really dont understand the concept of financial discipline and smart investment. Its so easy to brain wash them with half truths such as these.",
+                        "published_at": 3,
+                        "likes": 3
+                    }
+                ]
+            },
+            {
+                "author": "Mundane-Laugh8562",
+                "comment": "ఆంధ్ర లో ఇంకెవరు ఉన్నారని ఇలాంటివి మోదలెట్టాడానికి?",
+                "published_at": 1753513343.0,
+                "likes": 2,
+                "subcomments": []
+            },
+            {
+                "author": "Unknown",
+                "comment": "I think Quantum computing is just the problems which are getting solve in 100 years can be solved it in 10-15 seconds . It's that fast",
+                "published_at": 1753472222.0,
+                "likes": 2,
+                "subcomments": [
+                    {
+                        "author": "D_P_R_8055",
+                        "comment": "No that is not how you judge it, I've heard from somewhere that if traditional computing is like riding a car, quantum computing is like riding a boat. \n\nBoth good at what they do but can't replace each other...",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "No_sugarplease",
+                "comment": "people there are probabaly waiting for the right COmPany",
+                "published_at": 1753618956.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "PsychologyNo3622",
+                "comment": "Elantivi post pettukuntu kalalu kanadam cbn ku jackey lu lepadam tappinchi reality lo yem undadu. Quantum valley, ai city,it hub, drone hub it’s all just politicle agenda gain votes from corporate world 🤣🤣🤣🤣🤣🤣",
+                "published_at": 1753619501.0,
+                "likes": 1,
+                "subcomments": []
+            }
+        ]
+    },
+    {
+        "title": "Any insights on Quantum computing? What are the career opportunities here?",
+        "url": "https://www.reddit.com/r/cscareerquestions/comments/1lumfi5/any_insights_on_quantum_computing_what_are_the/",
+        "score": 0,
+        "comments_count": 16,
+        "author": "Vendetta1947",
+        "created_utc": 1751975153.0,
+        "selftext": "So recently my dad in particular got all hyped about Quantum computing. From what i made out of the Internet in general was that Quantum computing tech is still in its infancy, However there are major breakthroughs often like the Majorana chip that was the talk of the town a couple of months back. If my memory serves right, it also needs a highly monitored and customised  environment to install these computers too (like subzero temperature so that qubits can work their magic)\n\nI think Quantum computing often involves completely new sets of algorithms? Is it worth trying to become a specialist in this field? Especially if I only wanna do a bachelors, and no doctorate?\n\nI am a CSE undergrad rn, mostly focusing on AI/ML domain....\n\n(my dad forwards me links of quantum computing conferences all day i swear, save me)",
+        "comments": [
+            {
+                "author": "jocoka15",
+                "comment": "It does not look like a promising field based on this video: [Why I Left Quantum Computing Research](https://www.youtube.com/watch?v=pDj1QhPOVBo)\n\nIt is worth going through the comments too. A few other researchers also admitted leaving the field for similar reasons.",
+                "published_at": 1751977337.0,
+                "likes": 8,
+                "subcomments": [
+                    {
+                        "author": "The_Northern_Light",
+                        "comment": "I’ve been meaning to watch that video but haven’t gotten around to it. Can you summarize it for me?\n\nI suspect I know what it says, because I was in the field but walked away for a number of reasons.",
+                        "published_at": 3,
+                        "likes": 3
+                    }
+                ]
+            },
+            {
+                "author": "The_Northern_Light",
+                "comment": "I did some of my graduate studies on topological quantum error correction.\n\nQC is essentially entirely unrelated to normal “computer science” and software engineering.\n\nQC might be a good field to go into if you want to try to build some of the most insanely fragile hardware possible to imagine, and then most likely still fail despite spending your whole career on it. (ie, it’s not a good field to go into)\n\nYou don’t need new novel algorithms for QC, at least not the way you imagine it. You mostly just need to be able to actually implement amplitude amplification, and doing that is a hardware problem. There is no great demand for QC programmers like there is for classical computers.\n\nIf you reallllly want to do something in QC, go get a physics / math dual degree then apply to PhD programs. You will not get there with just a bachelors or with a conventional CS education. If you want to improve your employment prospects then QC is not a good path to walk. \n\nI say this even though I have a computational physics background and strongly recommend that path through formal education to anyone who is at all interested in it. I believe it’s consistently the best undergraduate background possible for people in engineering and scientific fields. Even better if you get a masters in computational physics then move on to industry or a PhD in whatever field you actually care about. It’s a narrower path to walk, but you won’t hurt for employment if you do.\n\nYou say you want to have just a bachelors and focus on ML. You will likely be working on data pipelines and not actually doing ML work without at least a masters. Or rather, a masters is the easiest way to have a good chance of doing actual ML work. If you’re okay simply working *around* ML stuff, or transferring those skills to another domain (maybe general purpose SWE, maybe something idiosyncratic to you), then sticking with your current program is a reasonable choice. Just learning some numerical linear algebra (like your program will teach you) is a big competitive advantage, and despite what the doomers say the demand for general software engineering skills will remain high.",
+                "published_at": 1751987966.0,
+                "likes": 5,
+                "subcomments": [
+                    {
+                        "author": "Vendetta1947",
+                        "comment": "I see, this is so helpful! while I do plan not to do Masters at this point, I would like to go for a doctorate in the future.... I would keep the computational physics programs you talked abt in my  mind",
+                        "published_at": 0,
+                        "likes": 0
+                    }
+                ]
+            },
+            {
+                "author": "Mountain_Economist_8",
+                "comment": "My mentor at my CS program had a PHD in quantum computing. He didn’t even like discussing it casually and did nothing practical with it.",
+                "published_at": 1751980259.0,
+                "likes": 3,
+                "subcomments": []
+            },
+            {
+                "author": "gnomeba",
+                "comment": "At the moment, to specialize in this field, you will likely have to become a physicist. There are jobs but they are primarily scientist positions because the field is so new. Otherwise, you will have to be even more of an expert in quantum logic and algorithms than the physicist are. \n\nThere are a vast number of extremely interesting things one could do with a QC with enough qubits, but it remains to be seen if systems of useful size will be feasible. That being said, it will probably be a long time until this determination can be made so there will be jobs in the field for a while. \n\nTake a look at some of the QC jobs and see if they look interesting to you. If you become an expert in the field, you'll probably be able to get a job, it's just a very high bar.",
+                "published_at": 1751990887.0,
+                "likes": 3,
+                "subcomments": []
+            },
+            {
+                "author": "SoggyGrayDuck",
+                "comment": "I believe you need to be a math expert more than computer engineer",
+                "published_at": 1751975941.0,
+                "likes": 2,
+                "subcomments": [
+                    {
+                        "author": "The_Northern_Light",
+                        "comment": "You need to be a physics expert, which is even worse. The limitation in QC is the hardware. We have the algorithms already. All the demand is in making the hardware work. \n\nLet me be very clear: the universe really really does not want that hardware to work. It’s not impossible, but only in a technical sense.\n\nIf doing postdoc after postdoc in quantum electro chromodynamics in hopes of being hired by one of a handful of companies to work on something that miiiiight work someday (but you’re liable to die before it does) sounds like an acceptable trade off, go for it.\n\nEveryone else should stay far away from QC, except for like, I dunno, pleasure reading Nielsen and Chuang for their erudition.",
+                        "published_at": 4,
+                        "likes": 4
+                    }
+                ]
+            },
+            {
+                "author": "Unknown",
+                "comment": "[deleted]",
+                "published_at": 1751983155.0,
+                "likes": 2,
+                "subcomments": [
+                    {
+                        "author": "The_Northern_Light",
+                        "comment": "To be clear: it’s not a good idea if your goal is money",
+                        "published_at": 5,
+                        "likes": 5
+                    }
+                ]
+            },
+            {
+                "author": "Unknown",
+                "comment": "[removed]",
+                "published_at": 1751979371.0,
+                "likes": 1,
+                "subcomments": [
+                    {
+                        "author": "AutoModerator",
+                        "comment": "Just don't.\n\n*I am a bot, and this action was performed automatically. Please [contact the moderators of this subreddit](/message/compose/?to=/r/cscareerquestions) if you have any questions or concerns.*",
+                        "published_at": 3,
+                        "likes": 3
+                    }
+                ]
+            },
+            {
+                "author": "Brambletail",
+                "comment": "Career opportunities are none unless you are willing to be employee 1-100 at any of the startups or start your own company.\n\nThe outlook is phenomenal, but not the 5 year hype cycle. More so \"in a generation's time, QC will be much more important\". That is assuming we don't just keep finding ways to expand chip size and improve silicon",
+                "published_at": 1752015705.0,
+                "likes": 1,
+                "subcomments": []
+            },
+            {
+                "author": "golferkris101",
+                "comment": "Make hay while sunshines. Stay with AI/ML. You can transition into QC, when there really is a viable platform, that's useable in the future and then the demand will increase and there will be opportunities to monetize",
+                "published_at": 1752025895.0,
+                "likes": 1,
+                "subcomments": []
+            }
+        ]
+    },
+    {
+        "title": "MIT sets world record with 99.998% fidelity in quantum computing breakthrough",
+        "url": "https://interestingengineering.com/science/99-998-fidelity-in-quantum-computing-by-mit",
+        "score": 6112,
+        "comments_count": 749,
+        "author": "Top-Chip-1532",
+        "created_utc": 1737055426.0,
+        "selftext": "🏳️‍🌈🐻s are fucked.",
+        "comments": [
+            {
+                "author": "Unknown",
+                "comment": "[deleted]",
+                "published_at": 1737056241.0,
+                "likes": 3698,
+                "subcomments": [
+                    {
+                        "author": "rcbjfdhjjhfd",
+                        "comment": "Nobody in WSB does",
+                        "published_at": 2580,
+                        "likes": 2580
+                    },
+                    {
+                        "author": "SpringFuzzy",
+                        "comment": "Let me explain it so WSB degenerates can understand. Quantum computing has something called qubits, you can think of qubits as your typical unpaid slave labor intern.\n\nNow, when you tell that overpaid double degree intern to do something do they do it? Or do they sneak off to the toilet for yet another quick wank?\n\n99.998% fidelity means that they only went wanking in 0.002% cases that you asked them to do something. So in the grand scheme of things that’s not too shabby.",
+                        "published_at": 516,
+                        "likes": 516
+                    },
+                    {
+                        "author": "Super_Muscle_7039",
+                        "comment": "The quantum computing has fidelity. That means they don’t go chasing tail around town",
+                        "published_at": 219,
+                        "likes": 219
+                    },
+                    {
+                        "author": "BadKidGames",
+                        "comment": "Less errors in the computation of a computer that can't really do anything right now, but if we learn to use it correctly, might unlock new understandings of the universe.",
+                        "published_at": 43,
+                        "likes": 43
+                    },
+                    {
+                        "author": "ImthatRootuser",
+                        "comment": "I think its about Fidelity investments.",
+                        "published_at": 40,
+                        "likes": 40
+                    }
+                ]
+            },
+            {
+                "author": "ObiWanCanownme",
+                "comment": "How am I supposed to buy calls on MIT though? HUH?? HOW???",
+                "published_at": 1737056424.0,
+                "likes": 1440,
+                "subcomments": [
+                    {
+                        "author": "ninjapenguinzz",
+                        "comment": "use the fidelity app",
+                        "published_at": 449,
+                        "likes": 449
+                    },
+                    {
+                        "author": "Earachelefteye",
+                        "comment": "There’s a company whose ceo has a phd from there and are using those materials \n[https://councils.forbes.com/profile/Alan-Baratz-CEO-D-Wave/39dc725a-e005-469f-8532-286df4848b8b](https://councils.forbes.com/profile/Alan-Baratz-CEO-D-Wave/39dc725a-e005-469f-8532-286df4848b8b)",
+                        "published_at": 85,
+                        "likes": 85
+                    },
+                    {
+                        "author": "El_Minadero",
+                        "comment": "Student loans? 😂😂😂",
+                        "published_at": 44,
+                        "likes": 44
+                    },
+                    {
+                        "author": "improv1ngthew0rld",
+                        "comment": "Buy rare Magic the Gathering cards",
+                        "published_at": 12,
+                        "likes": 12
+                    },
+                    {
+                        "author": "emanresuymsisihtolle",
+                        "comment": "Pretty sure there’s also collaboration with RGTI\nNot even joking, it on their website",
+                        "published_at": 12,
+                        "likes": 12
+                    }
+                ]
+            },
+            {
+                "author": "ninjadude93",
+                "comment": "Wake me up when they achieve 99.999%",
+                "published_at": 1737055670.0,
+                "likes": 1017,
+                "subcomments": [
+                    {
+                        "author": "JStanten",
+                        "comment": "I know a six sigma white belt when I see one. We got a corporate machine right here.",
+                        "published_at": 91,
+                        "likes": 91
+                    },
+                    {
+                        "author": "Unknown",
+                        "comment": "[deleted]",
+                        "published_at": 76,
+                        "likes": 76
+                    },
+                    {
+                        "author": "PostPostMinimalist",
+                        "comment": "Right??\n\nEveryone knows it’s that key 0.001 which makes all the difference.",
+                        "published_at": 5,
+                        "likes": 5
+                    },
+                    {
+                        "author": "livin_in_the_land",
+                        "comment": "Repeating, of course",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "Arby77",
+                        "comment": "That’s my favorite Greenday song.",
+                        "published_at": 2,
+                        "likes": 2
+                    }
+                ]
+            },
+            {
+                "author": "RemyVonLion",
+                "comment": "So my IONQ and RGTI call is going to the moon instead of the gutter like it currently is? Please lord.",
+                "published_at": 1737056419.0,
+                "likes": 355,
+                "subcomments": [
+                    {
+                        "author": "Unknown",
+                        "comment": "don't worry, they'll soft land right between my puts and your calls, as is fate.",
+                        "published_at": 197,
+                        "likes": 197
+                    },
+                    {
+                        "author": "AggrivatingAd",
+                        "comment": "Whyd it eat shit and lose 50% of its value within a week?",
+                        "published_at": 5,
+                        "likes": 5
+                    },
+                    {
+                        "author": "PoohTheWhinnie",
+                        "comment": "I literally have some $10 calls expiring tomorrow good lord if they moon",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "spaceneenja",
+                        "comment": "Calls on pasta 🍝 sauce? What?",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            },
+            {
+                "author": "Jonelololol",
+                "comment": "So it can hotdog or not hotdog ?",
+                "published_at": 1737057032.0,
+                "likes": 188,
+                "subcomments": [
+                    {
+                        "author": "digglerjdirk",
+                        "comment": "“Motherfuck. JIAN YAAANG!!!!”",
+                        "published_at": 78,
+                        "likes": 78
+                    },
+                    {
+                        "author": "mcChicken424",
+                        "comment": "What if I told you there is an APP on the MARket",
+                        "published_at": 11,
+                        "likes": 11
+                    }
+                ]
+            },
+            {
+                "author": "wasifaiboply",
+                "comment": "So we printed $6 trillion, blew up an everything bubble, trying now to pop it, failed so far, then before dealing with the consequences of that delicious COVID monetary policy, blew up an AI bubble and now we're also going to blow up a \"quantum computing bubble\" before a single AI application is even fucking _useful?_\n\nThe Dutch had Tulip Mania. This period of financial history will be known as Regard Mania by future generations.\n\nAbsolute complete fucking 🤡 world right now.",
+                "published_at": 1737059967.0,
+                "likes": 147,
+                "subcomments": [
+                    {
+                        "author": "SmPolitic",
+                        "comment": "Is it surprising as we do woefully minimal effort on climate change? \"Ignore the future, surely we will magic our way out of it, you're ruining the vibe by bringing it up, buy the tulips!\"",
+                        "published_at": 37,
+                        "likes": 37
+                    },
+                    {
+                        "author": "Numerous_Eggplants",
+                        "comment": "clowns are very efficient with cars, so puts on CVNA?",
+                        "published_at": 27,
+                        "likes": 27
+                    },
+                    {
+                        "author": "hotlou",
+                        "comment": "If you think there are no useful AI apps, you're stuck in 2023",
+                        "published_at": 26,
+                        "likes": 26
+                    },
+                    {
+                        "author": "Draiko",
+                        "comment": "AI isn't a bubble. If you think it is, you need to look beyond the little toys that are available to the general public.",
+                        "published_at": 7,
+                        "likes": 7
+                    },
+                    {
+                        "author": "Bullishontulips",
+                        "comment": "Bullish",
+                        "published_at": 4,
+                        "likes": 4
+                    }
+                ]
+            },
+            {
+                "author": "Unknown",
+                "comment": "[removed]",
+                "published_at": 1737056862.0,
+                "likes": 116,
+                "subcomments": [
+                    {
+                        "author": "alexppetrov",
+                        "comment": "Recently I was talking to a guy developing a quantum safe deposit box and asked him about those stuff and although I expected the response, the problem is that you can't currently do more than run simulations on the stuff using conventional techniques if you are an average researcher. Generally a lot of what is available now is being explained through conventional computing techniques. And like it's a lot harder to imagine than we think, think trying to imagine the 4th dimension. \n\nThe main benefit is that at scale, multiple qbits can produce a shitton of combinations very quickly, much more than your regular old bits. Quantum entanglement means just have a lot of combinations or than the same bits can do multiple operations at once. Imagine your phone can launch one app at a time, so to shit post you need to turn of the trading app. Qbits could allow you to brainrot, shit post and loose all of your money all at once.  Now imagine calculating probabilities (like most GPT models do to give you trading advice). Qbits would simplify this and either allow for better quicker computation or more efficient one. Financial transactions? Even quicker. Solve the entire chess? Possibly. Predict TSLA stock prices? Not possible, Elmo is unpredictable. \n\nTldr: qbits fast at math. More math more better.",
+                        "published_at": 46,
+                        "likes": 46
+                    },
+                    {
+                        "author": "graduation-dinner",
+                        "comment": "Here's an \"easy\" example of it being incredibly useful. The fermi hubbard model can't be solved on a classical computer, due to inherent antisymmetry in the wavefunction inducing \"the sign problem\" under exchange, which means all Monte Carlo methods fail. However, neutral atoms trapped in optical lattices can implement a trotterization rather directly, and bosonic qubits can still trotterize with some additional computational overhead. Make sense?\n\nMost of your comment indicates major misunderstandings of what quantum computation means and how it is useful, which I do not fault you for as there is more pop-sci pseudoscience on the topic out there trying to take your money than there probably is real science (as you've correctly noted). There is no faster than light communication, there is no \"computing all possibilities simultaneously,\" all of this is nonsense and you should ignore anyone who tries to tell you this. However, QCs do allow you to solve incredibly powerful physics and science problems. The results of that research will be extremely high impact, and that may or may not result in some big technological innovations down the line. Don't discard it completely just because there is a lot of people trying to sell you quantum supremacy BS who don't know what they're talking about.",
+                        "published_at": 17,
+                        "likes": 17
+                    },
+                    {
+                        "author": "Unknown",
+                        "comment": "Nah you are basically spot on.  If you talk to actual researchers they will also say it's decade, likely more away from real use at *scale*.  And if it doesn't scale it's mostly a fun toy.  \n\nNot CEOs or VC.  They will tell you we're already here producing \"real revenue\" but you look at their financials and it looks like some companies donated them $12M.",
+                        "published_at": 15,
+                        "likes": 15
+                    },
+                    {
+                        "author": "Gravbar",
+                        "comment": "It's a theoretically sound idea with a ton of use-cases, but the problem is actually building one big enough to do something useful. Eventually it will happen, but until then expect a long period of time where they're either useless or only have a niche usage that they can beat normal computers at. We could be decades from them being profitable.",
+                        "published_at": 7,
+                        "likes": 7
+                    },
+                    {
+                        "author": "Unknown",
+                        "comment": "[deleted]",
+                        "published_at": 7,
+                        "likes": 7
+                    }
+                ]
+            },
+            {
+                "author": "AdOk6675",
+                "comment": "What is the use case for quantum computing?",
+                "published_at": 1737056939.0,
+                "likes": 106,
+                "subcomments": [
+                    {
+                        "author": "anointedinliquor",
+                        "comment": "They can perform certain calculations in seconds which would take traditional computers (even the world's current largest super computer) trillions of years to complete. A good analogy is while a traditional computer would look to solve a maze one path at a time, a quantum computer is capable of checking all possible paths at once. They have theoretical use cases in pharmaceuticals (creating new drugs), military (encyrption), finance, and more we likely haven't considered yet.",
+                        "published_at": 291,
+                        "likes": 291
+                    },
+                    {
+                        "author": "elbay",
+                        "comment": "Regards here have the povvo POV. If you can develop the algo for it, it basically runs the paralellization at the same time. Like a nvidia gpu goes through billions of cases a second to find the solution. A quantum processor with the right algorithm and the right amount of input size just sharts out the right answer skipping the whole bothersome calculation shit. But since it’s quantum the answer you get is a bunch of weird ass waves + noise you need to decrypt. These nerds at MIT got somewhat of a low noise. Which is good.\n\nA no brainer thing that quantum could solve is protein folding and drug design. Right now we are making GPUs whine and try every single position and shape of a molecule like a regard. (And it’s not like a picture. It’s a video so you really have to go through the frames to figure out if your protein really would do that.) Quantum should theoretically be able to do this shit *really fast*.",
+                        "published_at": 28,
+                        "likes": 28
+                    },
+                    {
+                        "author": "PreparationAdvanced9",
+                        "comment": "A fully planned economy",
+                        "published_at": 11,
+                        "likes": 11
+                    },
+                    {
+                        "author": "Mrqueue",
+                        "comment": "It breaks a lot of encryption so basically lots of communication because insecure. \n\nThere is quantum secure encryption but normal people don’t use that because quantum computers breaking it is still a pipe dream",
+                        "published_at": 2,
+                        "likes": 2
+                    },
+                    {
+                        "author": "jl2l",
+                        "comment": "The most practical problem is what they call the traveling salesman problem. \n\nhttps://en.m.wikipedia.org/wiki/Travelling_salesman_problem\n\nIt's an optimization of scheduling tasks without all the information. Most computer systems are deterministic which means you have to have all the variables to compute the outcome. The novelty of this system is you don't need that.\n\nThe other use cases are more exotic less practical but have greater implications. The first functional quantum computer will be government controlled and will be used to break encryption but you won't hear about it. It'll probably be the Chinese and will probably happen in the next 15-20 years. Commercial applications for quantum computers are different.",
+                        "published_at": 2,
+                        "likes": 2
+                    }
+                ]
+            },
+            {
+                "author": "ToyStoryBoy6994",
+                "comment": "Is this where Demetri from Cobra Kai is going?",
+                "published_at": 1737056396.0,
+                "likes": 77,
+                "subcomments": [
+                    {
+                        "author": "cameron_cs",
+                        "comment": "Shut the FUCK up about MIT",
+                        "published_at": 27,
+                        "likes": 27
+                    },
+                    {
+                        "author": "Unknown",
+                        "comment": "Hawk dies at the Falun Gong",
+                        "published_at": 2,
+                        "likes": 2
+                    }
+                ]
+            },
+            {
+                "author": "Earachelefteye",
+                "comment": "D-wave ($qbts) started working with those superconductors last year [https://qmi.ubc.ca/fabricating-qubits-for-d-wave-quantum/](https://qmi.ubc.ca/fabricating-qubits-for-d-wave-quantum/) ![img](emote|t5_2th52|4275)",
+                "published_at": 1737055735.0,
+                "likes": 51,
+                "subcomments": [
+                    {
+                        "author": "Idobro",
+                        "comment": "D-wave is also releasing some products this year. Also in March Nvida’s GPU Tech conference will have a whole day dedicated to Quantum Computing. Could be a needle mover",
+                        "published_at": 4,
+                        "likes": 4
+                    },
+                    {
+                        "author": "Fujita_1",
+                        "comment": "definitely good stuff for D-wave but they need to start pursuing logic gate approach as annealing is more limited in applications (they are not universal quantum processors)",
+                        "published_at": 1,
+                        "likes": 1
+                    }
+                ]
+            }
+        ]
+    }
+]
