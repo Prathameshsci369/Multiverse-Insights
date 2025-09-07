@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# Corrected test.py with robust multi-source JSON extraction
+
 
 import json
 import gc
@@ -12,8 +11,8 @@ from llama_cpp import Llama
 
 # --- CONFIG ---
 # Update JSON_PATH to point to your desired file
-JSON_PATH = "/home/anand/Documents/data/reddit_data23146574.json"
-GGUF_PATH = "/home/anand/Downloads/phi4.gguf"
+JSON_PATH = "/home/anand/Documents/data/reddit_data23146574.json" #update your path according to your system
+GGUF_PATH = "/home/anand/Downloads/phi4.gguf" #update path according to your system , download this model from hugging face
 
 # --- Logging setup ---
 logging.basicConfig(
