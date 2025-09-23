@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Multiverse Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Multiverse Insights</h1>
+        <form method="post">
+            <label for="query">Search Query:</label>
+            <input type="text" id="query" name="query" value="{{ query if query is defined else '' }}" required>
+            <div class="platforms">
+                <label>Select Platforms:</label><br>
+                {% for platform in platforms %}
+                    <input type="checkbox" name="platforms" value="{{ platform }}" {% if selected_platforms is defined and platform in selected_platforms %}checked{% endif %}> {{ platform }}
+                {% endfor %}
+            </div>
+            <button type="submit">Search</button>
+        </form>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        {% if results %}
+            <h2>Results</h2>
+            {% for platform, data in results.items() %}
+                <h3>{{ platform }}</h3>
+                <div class="download-links">
+                    <a href="{{ download_links[platform]['json'] }}">Download JSON</a> |
+                    <a href="{{ download_links[platform]['csv'] }}">Download CSV</a>
+                </div>
+                {% if data and data|length > 0 and data[0] is mapping %}
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    {% for col in data[0].keys() %}
+                                        <th>{{ col }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in data %}
+                                    <tr>
+                                        {% for col in data[0].keys() %}
+                                            <td>
+                                                {% set cell = row[col] %}
+                                                {% if cell is mapping or cell is sequence and not cell is string %}
+                                                    <pre style="white-space: pre-wrap;">{{ cell | tojson(indent=0) }}</pre>
+                                                {% else %}
+                                                    {{ cell }}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No results found or data format not supported for table view.</p>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome | Multiverse Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Multiverse Insights</h1>
+        <p>
+            <b>Multiverse Insights</b> is a real-time social media data scraping and analytics platform.<br>
+            We collect, process, and analyze data from major platforms including <b>Reddit, YouTube, and Twitter</b>.<br>
+            Our system extracts meaningful insights for:
+        </p>
+        <ul>
+            <li>Market research and trend analysis</li>
+            <li>Fake news and misinformation detection</li>
+            <li>Crisis and event detection</li>
+            <li>Brand and sentiment monitoring</li>
+            <li>Custom monitoring systems for your needs</li>
+        </ul>
+        <p>
+            <b>How it works:</b> Enter your query, select platforms, and get real-time results in table format.<br>
+            Download your results as <b>CSV</b> or <b>JSON</b> for further analysis.
+        </p>
+        <a href="{{ url_for('index') }}" class="button">Start Exploring &rarr;</a>
+    </div>
+</body>
+</html>
