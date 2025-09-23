@@ -87,3 +87,46 @@ th {
 .button:hover {
     background: #4444a1;
 }
+.sidebar {
+    min-width: 220px;
+    background: #f0f0f8;
+    padding: 32px 16px 32px 16px;
+    border-radius: 8px 0 0 8px;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+    height: 100%;
+    position: sticky;
+    top: 40px;
+}
+.sidebar h2 {
+    margin-top: 0;
+    color: #2d2d6a;
+    font-size: 1.3rem;
+    margin-bottom: 24px;
+}
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+.sidebar ul li {
+    margin-bottom: 18px;
+}
+.sidebar ul li a {
+    color: #2d2d6a;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.08rem;
+    transition: color 0.2s;
+}
+.sidebar ul li a.active, .sidebar ul li a:hover {
+    color: #fff;
+    background: #2d2d6a;
+    padding: 6px 16px;
+    border-radius: 4px;
+}
+.main-content {
+    flex: 1;
+    padding: 40px 32px;
+    background: #fff;
+    border-radius: 0 8px 8px 0;
+    min-height: 400px;
+}
