@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from flask import Flask, render_template, request, send_file, url_for
+from flask import Flask, render_template, request, send_file, url_for, redirect
 import json
 import csv
 from reddit import RedditScraper
@@ -78,6 +78,13 @@ def index():
                     results['Twitter'] = data
                     download_links['Twitter'] = {'json': url_for('download_file', filename=os.path.basename(json_path)), 'csv': url_for('download_file', filename=os.path.basename(csv_path))}
     return render_template('index.html', platforms=PLATFORMS, results=results, download_links=download_links, query=query, selected_platforms=selected_platforms, error=error)
+
+@app.route('/report')
+@app.route('/report/<section>')
+def report(section=None):
+    if section is None:
+        section = 'sentiment'
+    return render_template('report.html', section=section)
 
 @app.route('/download/<filename>')
 def download_file(filename):
