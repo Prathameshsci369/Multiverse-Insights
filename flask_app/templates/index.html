@@ -8,7 +8,7 @@
 <body>
     <div class="container">
         <h1>Multiverse Insights</h1>
-        <form method="post">
+        <form method="post" style="display: flex; flex-direction: column; gap: 0.5rem;">
             <label for="query">Search Query:</label>
             <input type="text" id="query" name="query" value="{{ query if query is defined else '' }}" required>
             <div class="platforms">
@@ -17,7 +17,10 @@
                     <input type="checkbox" name="platforms" value="{{ platform }}" {% if selected_platforms is defined and platform in selected_platforms %}checked{% endif %}> {{ platform }}
                 {% endfor %}
             </div>
-            <button type="submit">Search</button>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button type="submit">Search</button>
+                <a href="{{ url_for('report') }}" class="button" style="margin: 0;">Analysis</a>
+            </div>
         </form>
         {% if error %}
             <div class="error">{{ error }}</div>
