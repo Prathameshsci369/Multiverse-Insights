@@ -8,6 +8,8 @@ import csv
 from reddit import RedditScraper
 from main_youtube import YouTubeDataExtractor
 from advance_twitter import TwitterScraper
+import requests
+import time
 
 app = Flask(__name__)
 
@@ -15,6 +17,9 @@ RESULTS_DIR = os.path.join(os.path.dirname(__file__), 'results')
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 PLATFORMS = ["Reddit", "YouTube", "Twitter"]
+
+ANALYSIS_API_URL = "https://refactored-chainsaw-jxgjxgwrj5p3qj6w-5000.app.github.dev/analyze"
+ANALYSIS_API_KEY = os.environ.get("ANALYSIS_API_KEY", "changeme123")
 
 def save_results(platform, data):
     json_path = os.path.join(RESULTS_DIR, f"{platform.lower()}_results.json")
@@ -27,6 +32,29 @@ def save_results(platform, data):
             writer.writeheader()
             writer.writerows(data)
     return json_path, csv_path
+
+# Helper to get all JSON files in the results directory
+def get_all_json_files():
+    return [os.path.join(RESULTS_DIR, f) for f in os.listdir(RESULTS_DIR) if f.endswith('.json')]
+
+def send_files_for_analysis():
+    files = get_all_json_files()
+    files_payload = [('files', (os.path.basename(f), open(f, 'rb'), 'application/json')) for f in files]
+    headers = {"X-API-KEY": ANALYSIS_API_KEY}
+    try:
+        response = requests.post(ANALYSIS_API_URL, files=files_payload, headers=headers, timeout=600)  # Wait up to 10 minutes
+        if response.status_code == 200:
+            # Save the analysis result
+            analysis_result_path = os.path.join(RESULTS_DIR, 'analysis_result.json')
+            with open(analysis_result_path, 'w', encoding='utf-8') as f:
+                f.write(response.text)
+            return analysis_result_path, response.json()
+        else:
+            return None, {"error": f"API returned status {response.status_code}: {response.text}"}
+    except requests.Timeout:
+        return None, {"error": "Analysis API timed out. Please try again later."}
+    except Exception as e:
+        return None, {"error": str(e)}
 
 @app.route('/')
 def home():
@@ -92,6 +120,31 @@ def download_file(filename):
     if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True)
     return "File not found", 404
+
+@app.route('/run_analysis')
+def run_analysis():
+    # Show a waiting page while analysis is running
+    from flask import render_template_string
+    waiting_html = '''
+    <html><head><title>Running Analysis...</title></head>
+    <body style="font-family:Arial;text-align:center;padding-top:80px;">
+    <h2>Running analysis on all data...<br>Please wait, this may take several minutes.</h2>
+    <div style="margin-top:40px;font-size:1.5em;">⏳</div>
+    </body></html>
+    '''
+    # Render waiting page immediately
+    import threading
+    import flask
+    def do_analysis():
+        path, result = send_files_for_analysis()
+        flask.session['analysis_result_path'] = path
+        flask.session['analysis_result'] = result
+    thread = threading.Thread(target=do_analysis)
+    thread.start()
+    # Wait for thread to finish (blocking, but shows waiting page)
+    thread.join()
+    # After analysis, redirect to report page
+    return flask.redirect(flask.url_for('report', section='sentiment'))
 
 if __name__ == '__main__':
     app.run(debug=True)
