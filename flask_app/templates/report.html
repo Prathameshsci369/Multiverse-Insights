@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report | Multiverse Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container" style="display: flex; min-height: 80vh;">
+        <nav class="sidebar">
+            <h2>Report</h2>
+            <ul>
+                <li><a href="{{ url_for('report', section='sentiment') }}" class="{% if section == 'sentiment' %}active{% endif %}">Sentiment Analysis</a></li>
+                <li><a href="{{ url_for('report', section='trends') }}" class="{% if section == 'trends' %}active{% endif %}">Trends</a></li>
+                <li><a href="{{ url_for('report', section='fake_news') }}" class="{% if section == 'fake_news' %}active{% endif %}">Fake News Detection</a></li>
+                <li><a href="{{ url_for('report', section='crisis') }}" class="{% if section == 'crisis' %}active{% endif %}">Crisis Detection</a></li>
+                <li><a href="{{ url_for('report', section='monitoring') }}" class="{% if section == 'monitoring' %}active{% endif %}">Monitoring</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            {% if section == 'sentiment' %}
+                <h3>Sentiment Analysis Report</h3>
+                <p>Sentiment analysis results and visualizations will appear here.</p>
+            {% elif section == 'trends' %}
+                <h3>Trends Report</h3>
+                <p>Trending topics and analytics will appear here.</p>
+            {% elif section == 'fake_news' %}
+                <h3>Fake News Detection Report</h3>
+                <p>Fake news detection results will appear here.</p>
+            {% elif section == 'crisis' %}
+                <h3>Crisis Detection Report</h3>
+                <p>Crisis and event detection results will appear here.</p>
+            {% elif section == 'monitoring' %}
+                <h3>Monitoring Report</h3>
+                <p>Brand and sentiment monitoring results will appear here.</p>
+            {% else %}
+                <h3>Welcome to the Report Section</h3>
+                <p>Select a report from the sidebar to view details.</p>
+            {% endif %}
+        </main>
+    </div>
+</body>
+</html>
