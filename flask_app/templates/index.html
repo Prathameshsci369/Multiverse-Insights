@@ -20,6 +20,10 @@
             <div style="display: flex; gap: 1rem; align-items: center;">
                 <button type="submit">Search</button>
                 <a href="{{ url_for('report') }}" class="button" style="margin: 0;">Analysis</a>
+                <button id="start-analysis-btn" type="button" class="button" style="margin: 0;">Start Analysis</button>
+                <div id="loader" style="display:none;margin-left:10px;">
+                    <span class="loader"></span> Running analysis...
+                </div>
             </div>
         </form>
         {% if error %}
@@ -67,5 +71,23 @@
             {% endfor %}
         {% endif %}
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('start-analysis-btn');
+            const loader = document.getElementById('loader');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    btn.disabled = true;
+                    loader.style.display = 'inline-block';
+                    fetch('/run_analysis', { method: 'GET' })
+                        .then(response => {
+                            if (response.redirected) {
+                                window.location.href = response.url;
+                            }
+                        });
+                });
+            }
+        });
+    </script>
 </body>
 </html>
