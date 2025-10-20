@@ -153,150 +153,94 @@ Report:
     result = llm_manager.generate(prompt, max_tokens=3000)
     return {"batch_id": batch_id, "result": result}
 
-# --- main combined_analysis (replace existing one) ---
-def combined_analysis123(llm, partial_results, token_budget_single_call=PHI4_MAX_CONTEXT - 1000,
-                     combined_token_budget=FINAL_REPORT_TOKENS, show_progress=True,
+def combined_analysis(llm, partial_results, token_budget_single_call=PHI4_MAX_CONTEXT - 1000, 
+                     combined_token_budget=FINAL_REPORT_TOKENS, show_progress=True, 
                      stream_llm_if_supported=True, custom_stream_handler=None):
     """
-    Performs a combined analysis (summarization, sentiment, topics) on the input data.
-    Ensures final prompt stays under token_budget_single_call by summarizing partial_results iteratively.
+    Performs a combined analysis on the input data.
+    Directly uses the cache data without sanitization.
     """
-    # initial joined text
-    joined_text = "\n\n".join([res.get('result', '') for res in partial_results])
+    # Debug: Print what we received
+    logging.info(f"Received {len(partial_results)} partial results")
+    
+    # Extract all results from partial_results, including error messages
+    all_results = []
+    for key, value in partial_results.items():
+        if isinstance(value, dict) and 'result' in value:
+            all_results.append(value['result'])
+        elif isinstance(value, str):
+            all_results.append(value)
+        else:
+            logging.warning(f"Unexpected type in partial_results for {key}: {type(value)}")
+    
+    # Join all results
+    joined_text = "\n\n".join(all_results)
+    
+    # Debug: Print what we're about to analyze
+    logging.info(f"Text to analyze length: {len(joined_text)} characters")
+    logging.info(f"Text to analyze tokens: {estimate_tokens(joined_text):,}")
+    logging.info(f"Text preview: {joined_text[:300]}...")
+    
     if not joined_text.strip():
-        logging.warning("No content found in partial results. Cannot generate final report.")
-        return "{\"multiverse_combined\": \"No data to analyze.\"}"
-
+        logging.warning("No content found to analyze.")
+        return "No data to analyze."
+    
     total_tokens = estimate_tokens(joined_text)
-
+    
     if show_progress:
         if custom_stream_handler:
             custom_stream_handler(f"Starting combined analysis on {total_tokens:,} tokens...")
         print(f"[{_iso_now()}] Starting combined analysis on {total_tokens:,} tokens...")
         print("---")
+    
+    # Enhanced prompt with explicit instructions
+    prompt = f"""You are to analyze ONLY the text provided below. Do not invent or create your own examples. Focus solely on analyzing the given content.
 
-    # If total tokens exceed the single-call budget, compress partial_results
-    if total_tokens > token_budget_single_call:
-        logging.info(f"Total tokens {total_tokens:,} exceed token_budget_single_call ({token_budget_single_call:,}). Starting compression.")
-        # parameters you can tune:
-        SUMMARY_MAX_TOKENS = min(2000, int(token_budget_single_call * 0.1))  # per-group summary allowance
-        INITIAL_GROUP_SIZE = 8
-        MIN_GROUP_SIZE = 2
-        MAX_ROUNDS = 8
-
-        compressed = _ensure_under_token_budget(
-            llm,
-            partial_results,
-            token_budget=token_budget_single_call,
-            summary_max_tokens=SUMMARY_MAX_TOKENS,
-            group_size=INITIAL_GROUP_SIZE,
-            min_group_size=MIN_GROUP_SIZE,
-            max_rounds=MAX_ROUNDS
-        )
-        # replace partial_results and recompute joined_text
-        partial_results = compressed
-        joined_text = "\n\n".join([res.get('result', '') for res in partial_results])
-        total_tokens = estimate_tokens(joined_text)
-        logging.info(f"After compression, total tokens: {total_tokens:,}")
-
-        # If still over budget after rounds, truncate conservatively by keeping highest-level summaries only
-        if total_tokens > token_budget_single_call:
-            logging.warning("Final compressed text still exceeds token budget. Truncating to fit.")
-            # greedy trim: keep concatenated summaries until under budget
-            kept = []
-            for item in partial_results:
-                kept.append(item)
-                if estimate_tokens("\n\n".join([k.get("result", "") for k in kept])) > token_budget_single_call:
-                    # remove last and break
-                    kept.pop()
-                    break
-            partial_results = kept
-            joined_text = "\n\n".join([res.get('result', '') for res in partial_results])
-            total_tokens = estimate_tokens(joined_text)
-            logging.info(f"After truncation, total tokens: {total_tokens:,}")
-
-    # Now build the final prompt (same as your original prompt)
-    # use this prompt (shorter, precise)
-    prompt = f"""
-You are an assistant that MUST output only valid JSON (no commentary, no tags, no code fences).
-Return a single JSON object whose top-level key is "multiverse_combined".
-
-Required structure:
-{{
-  "multiverse_combined": {{
-    "executive_summary": "<string>",
-    "sentiment_analysis": {{
-      "positive": {{"percentage": 0, "reasoning": ""}},
-      "negative": {{"percentage": 0, "reasoning": ""}},
-      "neutral":  {{"percentage": 0, "reasoning": ""}}
-    }},
-    "topics": {{}},
-    "entity_recognition": [],
-    "relationship_extraction": [],
-    "anomaly_detection": [],
-    "controversy_score": {{"value": 0.0, "explanation": ""}}
-  }}
-}}
-
-Fill fields based ONLY on the input corpus below. If a field cannot be determined, return an empty string/object/array. Do NOT include any text outside the JSON.
-
-Corpus:
+TEXT TO ANALYZE:
 {joined_text}
-"""
 
+Provide your analysis in this exact format:
 
+EXECUTIVE_SUMMARY:
+[Provide a brief summary of the main points FROM THE TEXT ABOVE]
 
+SENTIMENT:
+Positive: [percentage]% - [reasoning BASED ON THE TEXT ABOVE]
+Negative: [percentage]% - [reasoning BASED ON THE TEXT ABOVE]
+Neutral: [percentage]% - [reasoning BASED ON THE TEXT ABOVE]
 
+TOPICS:
+[List the main topics FROM THE TEXT ABOVE, one per line]
 
+ENTITIES:
+[List the key entities FROM THE TEXT ABOVE, one per line]
+
+RELATIONSHIPS:
+[Describe relationships between entities FROM THE TEXT ABOVE, one per line in format: Entity1 -> Entity2: Description]
+
+ANOMALIES:
+[List any anomalies FROM THE TEXT ABOVE, one per line, or write "None detected"]
+
+CONTROVERSY_SCORE:
+[score]/1.0 - [explanation BASED ON THE TEXT ABOVE]
+
+CRITICAL INSTRUCTIONS:
+1. Analyze ONLY the text provided above.
+2. Do not create your own examples or content.
+3. After completing the CONTROVERSY_SCORE section, stop immediately.
+4. Do not repeat any part of your response."""
         
     # Use the streaming function for the final report
     response = call_llm_and_stream_to_terminal_and_file(
         llm, 
         prompt, 
-        max_tokens=combined_token_budget,
+        max_tokens=min(combined_token_budget, 3000),
         out_filepath="final_analysis_report.json",
         enable_stream=stream_llm_if_supported,
         custom_stream_handler=custom_stream_handler
     )
 
-    # Clean and validate the response (same as before)
-    response = response.strip()
-    
-    # Try to extract valid JSON from the response
-    # try:
-    #     # Find the start of JSON object
-    #     start_idx = response.find('{')
-    #     if start_idx == -1:
-    #         raise ValueError("No JSON object found in response")
-        
-    #     # Find the end of JSON object
-    #     brace_count = 0
-    #     end_idx = -1
-    #     for i in range(start_idx, len(response)):
-    #         if response[i] == '{':
-    #             brace_count += 1
-    #         elif response[i] == '}':
-    #             brace_count -= 1
-    #             if brace_count == 0:
-    #                 end_idx = i
-    #                 break
-        
-    #     if end_idx == -1:
-    #         raise ValueError("Incomplete JSON object")
-        
-    #     # Extract the JSON
-    #     json_str = response[start_idx:end_idx+1]
-        
-    #     # Validate that it's valid JSON
-    #     parsed_json = json.loads(json_str)
-    #     return json_str
-        
-    # except (ValueError, json.JSONDecodeError) as e:
-    #     logging.error(f"Failed to extract valid JSON from response: {e}")
-    #     logging.debug(f"Raw response: {response[:500]}...")
-        
-        # Return a simple valid JSON with error message
-    return response
+    return response.strip()
 
         
         
@@ -424,7 +368,7 @@ Rules: Output only valid JSON starting with '{{' and ending with '}}', having on
         
         
         
-def combined_analysis(llm, partial_results, token_budget_single_call=PHI4_MAX_CONTEXT - 1000, 
+def combined_analysis123(llm, partial_results, token_budget_single_call=PHI4_MAX_CONTEXT - 1000, 
                      combined_token_budget=FINAL_REPORT_TOKENS, show_progress=True, 
                      stream_llm_if_supported=True, custom_stream_handler=None):
     """
