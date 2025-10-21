@@ -43,7 +43,7 @@ def combine_analysis(json_path: str) -> str:
 
 # Example usage (uncomment and update path to run)
 if __name__ == "__main__":
-    path = "/home/anand/Documents/data/youtube_search_output54198796.json"
+    path = "/home/anand/final_app/data/reddit_20251013_123358.json"
     print(path)
     combine_analysis(path)
     
