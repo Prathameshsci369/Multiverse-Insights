@@ -15,6 +15,40 @@ from llm_interface import call_llm_and_stream_to_terminal_and_file
 import math
 from typing import List, Dict
 
+
+def extract_first_analysis_block(text):
+    """
+    Return the first valid analysis block up to CONTROVERSY_SCORE (inclusive)
+    or up to the unique end token '===END_OF_ANALYSIS===' if present.
+    If nothing matches, return best-effort trimmed text.
+    """
+    # 1) If model echoed the end token, prefer slicing up to it
+    end_token = "===END_OF_ANALYSIS==="
+    if end_token in text:
+        first_part = text.split(end_token)[0].strip()
+        return first_part
+
+    # 2) Otherwise try to capture from EXECUTIVE_SUMMARY ... CONTROVERSY_SCORE (first occurrence)
+    pattern = re.compile(
+        r'EXECUTIVE_SUMMARY:.*?CONTROVERSY_SCORE:.*?(?:/1\.0\s*-\s*.*?$)',
+        re.DOTALL | re.MULTILINE
+    )
+    m = pattern.search(text)
+    if m:
+        return m.group(0).strip()
+
+    # 3) Fallback: capture from start until the first repeated EXECUTIVE_SUMMARY (to avoid repeats)
+    first_exec = text.find("EXECUTIVE_SUMMARY:")
+    if first_exec != -1:
+        # find next EXECUTIVE_SUMMARY after the first — if exists, cut before it
+        second_exec = text.find("EXECUTIVE_SUMMARY:", first_exec + 1)
+        if second_exec != -1:
+            return text[first_exec:second_exec].strip()
+        # else return from first to end, but remove obvious repeated suffixes
+        return text[first_exec:].strip()
+
+    # 4) Last fallback: return the whole text trimmed
+    return text.strip()
 # --- helper: summarize a list of texts using a small summarization prompt ---
 def _summarize_texts_with_llm(llm, texts: List[str], max_summary_tokens: int = 800, prompt_note: str = "") -> str:
     """
@@ -153,6 +187,7 @@ Report:
     result = llm_manager.generate(prompt, max_tokens=3000)
     return {"batch_id": batch_id, "result": result}
 
+# --- main combined_analysis (replace existing one) ---
 def combined_analysis(llm, partial_results, token_budget_single_call=PHI4_MAX_CONTEXT - 1000, 
                      combined_token_budget=FINAL_REPORT_TOKENS, show_progress=True, 
                      stream_llm_if_supported=True, custom_stream_handler=None):
@@ -193,8 +228,8 @@ def combined_analysis(llm, partial_results, token_budget_single_call=PHI4_MAX_CO
         print(f"[{_iso_now()}] Starting combined analysis on {total_tokens:,} tokens...")
         print("---")
     
-    # Enhanced prompt with explicit instructions
-    prompt = f"""You are to analyze ONLY the text provided below. Do not invent or create your own examples. Focus solely on analyzing the given content.
+    # Simple prompt with clear format
+    prompt = f"""Analyze the following text and provide a structured analysis:
 
 TEXT TO ANALYZE:
 {joined_text}
@@ -202,46 +237,50 @@ TEXT TO ANALYZE:
 Provide your analysis in this exact format:
 
 EXECUTIVE_SUMMARY:
-[Provide a brief summary of the main points FROM THE TEXT ABOVE]
+[Write a brief summary of the main points]
 
 SENTIMENT:
-Positive: [percentage]% - [reasoning BASED ON THE TEXT ABOVE]
-Negative: [percentage]% - [reasoning BASED ON THE TEXT ABOVE]
-Neutral: [percentage]% - [reasoning BASED ON THE TEXT ABOVE]
+Positive: [number]% - [brief explanation]
+Negative: [number]% - [brief explanation]
+Neutral: [number]% - [brief explanation]
 
 TOPICS:
-[List the main topics FROM THE TEXT ABOVE, one per line]
+[List the main topics, one per line]
 
 ENTITIES:
-[List the key entities FROM THE TEXT ABOVE, one per line]
+[List the key entities, one per line]
 
 RELATIONSHIPS:
-[Describe relationships between entities FROM THE TEXT ABOVE, one per line in format: Entity1 -> Entity2: Description]
+[Describe relationships between entities, one per line in format: Entity1 -> Entity2: Description]
 
 ANOMALIES:
-[List any anomalies FROM THE TEXT ABOVE, one per line, or write "None detected"]
+[List any anomalies or unusual patterns, one per line, or write "None detected"]
 
 CONTROVERSY_SCORE:
-[score]/1.0 - [explanation BASED ON THE TEXT ABOVE]
+[number]/1.0 - [explanation]
 
-CRITICAL INSTRUCTIONS:
-1. Analyze ONLY the text provided above.
-2. Do not create your own examples or content.
-3. After completing the CONTROVERSY_SCORE section, stop immediately.
-4. Do not repeat any part of your response."""
-        
-    # Use the streaming function for the final report
-    response = call_llm_and_stream_to_terminal_and_file(
+STOP AFTER THIS LINE.
+Print this exact token after the final line: ===END_OF_ANALYSIS===
+DO NOT OUTPUT ANYTHING AFTER ===END_OF_ANALYSIS===."""
+    
+    # Use the streaming function with a strict token limit
+    raw_response = call_llm_and_stream_to_terminal_and_file(
         llm, 
         prompt, 
-        max_tokens=min(combined_token_budget, 3000),
+        max_tokens=2000,  # Reduced token limit to prevent excessive generation
         out_filepath="final_analysis_report.json",
         enable_stream=stream_llm_if_supported,
         custom_stream_handler=custom_stream_handler
     )
-
-    return response.strip()
-
+    
+    # Post-process to extract only the first analysis block
+    cleaned = extract_first_analysis_block(raw_response)
+    
+    # Save the cleaned response to a separate file for debugging
+    with open("final_analysis_report_clean.txt", "w", encoding="utf-8") as f:
+        f.write(cleaned)
+    
+    return cleaned.strip()
         
         
         
@@ -253,8 +292,28 @@ def combined_analysis_V2(llm, partial_results, token_budget_single_call=PHI4_MAX
     Performs a combined analysis (summarization, sentiment, topics) on the input data.
     Modified to support custom stream handlers.
     """
-    # The fix is here: correctly join the 'result' field from each dictionary
-    joined_text = "\n\n".join([res.get('result', '') for res in partial_results])
+    # Accept partial_results as either a dict (id->item), a list of items, or a single string
+    results_list = []
+    if isinstance(partial_results, dict):
+        for k, v in partial_results.items():
+            if isinstance(v, dict):
+                results_list.append(v.get('result', '') or '')
+            elif isinstance(v, str):
+                results_list.append(v)
+            else:
+                results_list.append(str(v))
+    elif isinstance(partial_results, list):
+        for item in partial_results:
+            if isinstance(item, dict):
+                results_list.append(item.get('result', '') or '')
+            elif isinstance(item, str):
+                results_list.append(item)
+            else:
+                results_list.append(str(item))
+    else:
+        results_list = [str(partial_results)]
+
+    joined_text = "\n\n".join([r for r in results_list if r])
     
     if not joined_text.strip():
         logging.warning("No content found in partial results. Cannot generate final report.")
@@ -274,7 +333,7 @@ You are a highly specialized AI analyst. Your ONLY task is to analyze the provid
 
 You MUST STRICTLY adhere to the following rules:
 Rules: Output only valid JSON starting with '{{' and ending with '}}', having one key "multiverse_combined". Base analysis strictly on given text only. Include exactly one entity_recognition section, one relationship_extraction section, one anomaly_detection section, and one controversy_score section. Use correct JSON syntax with proper quoting and escaping. No extra text or commentary outside JSON.
-
+If you not got the text for the analysis, respond with an empty structure with zeroes  proper words to not get data. 
 </instructions>
 
 <analysis_request>
@@ -375,8 +434,28 @@ def combined_analysis123(llm, partial_results, token_budget_single_call=PHI4_MAX
     Performs a combined analysis (entity recognition, relationship extraction, anomaly detection, controversy score) on the input data.
     Modified to support custom stream handlers.
     """
-    # The fix is here: correctly join the 'result' field from each dictionary
-    joined_text = "\n\n".join([res.get('result', '') for res in partial_results])
+    # Accept partial_results as either a dict (id->item), a list of items, or a single string
+    results_list = []
+    if isinstance(partial_results, dict):
+        for k, v in partial_results.items():
+            if isinstance(v, dict):
+                results_list.append(v.get('result', '') or '')
+            elif isinstance(v, str):
+                results_list.append(v)
+            else:
+                results_list.append(str(v))
+    elif isinstance(partial_results, list):
+        for item in partial_results:
+            if isinstance(item, dict):
+                results_list.append(item.get('result', '') or '')
+            elif isinstance(item, str):
+                results_list.append(item)
+            else:
+                results_list.append(str(item))
+    else:
+        results_list = [str(partial_results)]
+
+    joined_text = "\n\n".join([r for r in results_list if r])
     
     if not joined_text.strip():
         logging.warning("No content found in partial results. Cannot generate final report.")
@@ -389,60 +468,71 @@ def combined_analysis123(llm, partial_results, token_budget_single_call=PHI4_MAX
             custom_stream_handler(f"Starting combined analysis on {total_tokens:,} tokens...")
         print(f"[{_iso_now()}] Starting combined analysis on {total_tokens:,} tokens...")
         print("---")
+    print(joined_text[:1000] + "\n...")
     
-    # The prompt is modified to request JSON output
-    prompt = f"""<instructions>
-You are a highly specialized AI analyst. Your ONLY task is to analyze the provided text corpus and generate a comprehensive synthesis in a single, well-formed JSON document.
+    # The prompt is modified to request JSON output with clear examples
+    prompt = f"""You are an expert analyst. Analyze ONLY the text below and return your analysis as a SINGLE JSON OBJECT. 
+DO NOT return any text, headings, or content outside of the JSON structure.
 
-You MUST STRICTLY adhere to the following rules:
-1. Output only valid JSON starting with '{{' and ending with '}}', having one key "multiverse_combined".
-2. Base analysis strictly on given text only.
-3. Include exactly one entity_recognition section, one relationship_extraction section, one anomaly_detection section, and one controversy_score section.
-4. Use correct JSON syntax with proper quoting and escaping.
-5. No extra text, numbers, or commentary outside the JSON structure.
-6. The entire response must be a single valid JSON object.
-7. Do not include any XML tags like <response> or </response>.
+TEXT TO ANALYZE:
+{joined_text}
 
-</instructions>
+Your entire response must be a single valid JSON object following this exact structure:
 
-<analysis_request>
-
-Generate a JSON with the following structure:
 {{
   "multiverse_combined": {{
-    "entity_recognition": [
+    "executive_summary": "Brief overview of key points from the text",
+    "sentiment_analysis": {{
+      "positive": {{
+        "percentage": 25,
+        "reasoning": "Evidence from text showing positive aspects"
+      }},
+      "negative": {{
+        "percentage": 45,
+        "reasoning": "Evidence from text showing negative aspects"
+      }},
+      "neutral": {{
+        "percentage": 30,
+        "reasoning": "Evidence from text showing neutral aspects"
+      }}
+    }},
+    "topics": [
+      "Topic 1",
+      "Topic 2"
+    ],
+    "entities": [
+      "Entity 1",
+      "Entity 2"
+    ],
+    "relationships": [
       {{
-        "type": "PERSON|ORGANIZATION|LOCATION|DATE",
-        "name": "string"
+        "entity1": "First Entity",
+        "relationship": "Type of connection",
+        "entity2": "Second Entity",
+        "description": "Details from text"
       }}
     ],
-    "relationship_extraction": [
+    "anomalies": [
       {{
-        "entity1": "string",
-        "relationship": "string",
-        "entity2": "string"
-      }}
-    ],
-    "anomaly_detection": [
-      {{
-        "section": "string",
-        "description": "string"
+        "description": "Any unusual patterns or outliers"
       }}
     ],
     "controversy_score": {{
-      "value": 0.0,
-      "explanation": "string"
+      "score": 0.7,
+      "explanation": "Reasoning from the text"
     }}
   }}
 }}
 
-</analysis_request>
-
-<corpus>
-{joined_text}
-</corpus>
-
-Your response must start with '{{' and end with '}}' and be valid JSON:"""
+CRITICAL RULES:
+1. Output MUST be valid JSON that can be parsed by json.loads()
+2. Analysis MUST be based ONLY on the provided text
+3. Do not include ANY text outside the JSON structure
+4. Use ONLY double quotes for strings
+5. Ensure all JSON keys and values are properly quoted
+6. Remove any trailing commas
+7. Include the exact structure shown above
+8. Fill in real values based on your analysis"""
 
         
     # Use the streaming function for the final report
@@ -497,7 +587,33 @@ Your response must start with '{{' and end with '}}' and be valid JSON:"""
         # Validate that it's valid JSON
         parsed_json = json.loads(json_str)
         
-        # Ensure the output has the expected structure
+        # Check for template/placeholder values
+        template_indicators = [
+            '"type": "string"',
+            '"name": "string"',
+            '"entity1": "string"',
+            '"entity2": "string"',
+            '"description": "string"',
+            'PERSON|ORGANIZATION|LOCATION|DATE',
+            'DO NOT COPY',
+            'Example'
+        ]
+        
+        json_str_lower = json_str.lower()
+        template_matches = sum(1 for indicator in template_indicators 
+                             if indicator.lower() in json_str_lower)
+        
+        if template_matches >= 2:  # If we find 2 or more template indicators
+            logging.warning("Detected template response instead of actual analysis")
+            return json.dumps({
+                "multiverse_combined": {
+                    "error": "Analysis contains template values instead of actual content",
+                    "details": "The model returned example/placeholder values instead of real analysis",
+                    "raw_response": json_str[:500] + "..." if len(json_str) > 500 else json_str
+                }
+            }, indent=2)
+        
+        # If no template detected, ensure expected structure
         if "multiverse_combined" not in parsed_json:
             logging.warning("Output doesn't contain 'multiverse_combined' key. Wrapping response.")
             return json.dumps({"multiverse_combined": parsed_json}, indent=2)
