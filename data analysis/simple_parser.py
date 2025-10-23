@@ -16,6 +16,10 @@ class SimpleParser:
         """Parse the simple format output from the analysis"""
         result = {"multiverse_combined": {}}
         
+        # Debug: Print the first 500 characters of the text
+        if self.debug:
+            print(f"[DEBUG] First 500 chars of text: {text[:500]}")
+        
         # Try multiple patterns for executive summary
         # Pattern 1: Standard format with EXECUTIVE_SUMMARY:
         exec_match = re.search(r'EXECUTIVE_SUMMARY:\s*\n?(.*?)(?=\nSENTIMENT:|\nTOPICS:|\nENTITIES:|\nRELATIONSHIPS:|\nANOMALIES:|\nCONTROVERSY_SCORE:|\Z)', text, re.DOTALL | re.IGNORECASE)
@@ -240,24 +244,122 @@ def parse_simple_format(text: str, debug=False) -> Dict[str, Any]:
     parser = SimpleParser(debug=debug)
     return parser.parse_simple_format(text)
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python simple_parser.py <input_file> [--debug]")
-        sys.exit(1)
+def parse_and_display(input_file: str, output_file: str = None, debug: bool = False):
+    """
+    Parse the simple format output from the analysis and display or save the results
     
-    input_file = sys.argv[1]
-    debug = "--debug" in sys.argv
-    
+    Args:
+        input_file: Path to the input file containing the analysis text
+        output_file: Path to save the parsed JSON results (optional)
+        debug: Whether to enable debug output
+    """
     with open(input_file, 'r', encoding='utf-8') as f:
         text = f.read()
     
     result = parse_simple_format(text, debug=debug)
     
-    # Save the parsed data to a JSON file
-    with open('parsed_output.json', 'w', encoding='utf-8') as f:
-        json.dump(result, f, indent=4, ensure_ascii=False)
+    # Save the parsed data to a JSON file if output_file is provided
+    if output_file:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(result, f, indent=4, ensure_ascii=False)
+        print(f"✅ Parsed data saved to {output_file}")
     
-    print("✅ Parsed data saved to parsed_output.json")
+    # Display the parsed results
+    print("\n" + "="*80)
+    print("PARSED ANALYSIS RESULTS")
+    print("="*80)
+    
+    if "multiverse_combined" in result:
+        analysis_data = result["multiverse_combined"]
+        
+        # Executive Summary
+        if "executive_summary" in analysis_data:
+            print("\nEXECUTIVE SUMMARY:")
+            print("-" * 40)
+            print(analysis_data["executive_summary"])
+        
+        # Sentiment Analysis
+        if "sentiment_analysis" in analysis_data:
+            print("\nSENTIMENT ANALYSIS:")
+            print("-" * 40)
+            sentiment = analysis_data["sentiment_analysis"]
+            for sentiment_type, data in sentiment.items():
+                if isinstance(data, dict) and "percentage" in data and "reasoning" in data:
+                    print(f"{sentiment_type.capitalize()}: {data['percentage']}% - {data['reasoning']}")
+        
+        # Topics
+        if "topics" in analysis_data:
+            print("\nKEY TOPICS:")
+            print("-" * 40)
+            for i, topic in enumerate(analysis_data["topics"], 1):
+                print(f"{i}. {topic}")
+        
+        # Entities
+        if "entity_recognition" in analysis_data:
+            print("\nRECOGNIZED ENTITIES:")
+            print("-" * 40)
+            for i, entity in enumerate(analysis_data["entity_recognition"], 1):
+                print(f"{i}. {entity}")
+        
+        # Relationships
+        if "relationship_extraction" in analysis_data:
+            print("\nRELATIONSHIPS:")
+            print("-" * 40)
+            for i, rel in enumerate(analysis_data["relationship_extraction"], 1):
+                if isinstance(rel, dict):
+                    if rel.get("entity1") and rel.get("entity2"):
+                        print(f"{i}. {rel['entity1']} ↔ {rel['entity2']}: {rel['relationship']}")
+                    elif rel.get("entity1"):
+                        print(f"{i}. {rel['entity1']}: {rel['relationship']}")
+                    else:
+                        print(f"{i}. {rel['relationship']}")
+                else:
+                    print(f"{i}. {rel}")
+        
+        # Anomalies
+        if "anomaly_detection" in analysis_data:
+            print("\nDETECTED ANOMALIES:")
+            print("-" * 40)
+            if not analysis_data["anomaly_detection"]:
+                print("No anomalies detected")
+            else:
+                for i, anomaly in enumerate(analysis_data["anomaly_detection"], 1):
+                    if isinstance(anomaly, dict) and "description" in anomaly:
+                        print(f"{i}. {anomaly['description']}")
+                    else:
+                        print(f"{i}. {anomaly}")
+        
+        # Controversy Score
+        if "controversy_score" in analysis_data:
+            print("\nCONTROVERSY SCORE:")
+            print("-" * 40)
+            score_data = analysis_data["controversy_score"]
+            if isinstance(score_data, dict) and "value" in score_data and "explanation" in score_data:
+                print(f"Score: {score_data['value']}/1.0")
+                print(f"Explanation: {score_data['explanation']}")
+    
+    print("\n" + "="*80)
+    print("END OF ANALYSIS")
+    print("="*80)
+    
+    return result
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python simple_parser.py <input_file> [--output <output_file>] [--debug]")
+        sys.exit(1)
+    
+    input_file = sys.argv[1]
+    output_file = None
+    debug = "--debug" in sys.argv
+    
+    # Check if output file is specified
+    if "--output" in sys.argv:
+        output_index = sys.argv.index("--output")
+        if output_index + 1 < len(sys.argv):
+            output_file = sys.argv[output_index + 1]
+    
+    parse_and_display(input_file, output_file, debug)
 
 if __name__ == "__main__":
     main()
