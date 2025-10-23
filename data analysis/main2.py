@@ -4,6 +4,7 @@ from main1 import run_v2_analysis  # Assuming this function exists for V2 analys
 import json
 import os 
 import re 
+import time
 from typing import Dict, Any
 
 # Define the output file name
@@ -12,12 +13,42 @@ OUTPUT_FILE = "final_output.txt"  # Changed to .txt since we're using simple for
 def combine_analysis(json_path: str) -> str:
     """
     Orchestrates the V1 analysis (calling main.main()), 
-    and saves the result to a file.
+    with cache validation and state tracking.
     """
     print("Analysis are starting")
     
+    # Ensure cache directory exists
+    cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cache")
+    os.makedirs(cache_dir, exist_ok=True)
+    
+    # Cache state file
+    cache_state_file = os.path.join(cache_dir, "analysis_state.json")
+    
+    # Initialize or load cache state
+    if os.path.exists(cache_state_file):
+        try:
+            with open(cache_state_file, 'r') as f:
+                cache_state = json.load(f)
+        except:
+            cache_state = {"last_run": None, "input_hash": None}
+    else:
+        cache_state = {"last_run": None, "input_hash": None}
+    
     # --- Step 1: Run V1 analysis (returns the raw LLM string output) ---
-    a_json_string = main(json_path) 
+    a_json_string = main(json_path)
+    
+    # Save cache state
+    import hashlib
+    with open(json_path, 'rb') as f:
+        input_hash = hashlib.md5(f.read()).hexdigest()
+    
+    cache_state.update({
+        "last_run": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "input_hash": input_hash
+    })
+    
+    with open(cache_state_file, 'w') as f:
+        json.dump(cache_state, f, indent=2)
     
     # Save the raw output to a file for debugging
     with open("raw_output.txt", 'w', encoding='utf-8') as f:
@@ -43,7 +74,7 @@ def combine_analysis(json_path: str) -> str:
 
 # Example usage (uncomment and update path to run)
 if __name__ == "__main__":
-    path = "/home/anand/final_app/data/reddit_20251013_123358.json"
+    path = "/home/anand/Documents/data/reddit_data23146574.json"
     print(path)
     combine_analysis(path)
     
