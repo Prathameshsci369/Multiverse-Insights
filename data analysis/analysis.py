@@ -156,20 +156,42 @@ from utils import estimate_tokens
 from config import PHI4_MAX_CONTEXT
 
 def process_batch(llm_manager, batch, batch_id):
-    """Processes a single batch using a specific LLM instance, keeping prompt under 16k tokens."""
-    joined_text = " ".join(batch)
+    """Processes a single batch using a specific LLM instance, with strict token management."""
+    from config import MIN_TOKENS_RESERVE, SAFETY_MARGIN, PHI4_MAX_CONTEXT
+    
+    # Join batch texts and clean
+    joined_text = " ".join(text.strip() for text in batch if text)
+    
+    # Ultra-conservative token management
+    prompt_overhead = 2000  # System message and prompt structure
+    expected_response = 4000  # Response generation
+    safety_margin = 1000  # Additional safety buffer
+    max_safe_tokens = PHI4_MAX_CONTEXT - prompt_overhead - expected_response - safety_margin
+    
+    # Pre-validate token count
+    total_tokens = estimate_tokens(joined_text)
+    if total_tokens > max_safe_tokens:
+        logging.warning(f"Batch {batch_id} requires {total_tokens} tokens, exceeding safe limit of {max_safe_tokens}")
 
     # Estimate total tokens
     total_tokens = estimate_tokens(joined_text)
-    max_safe_tokens = PHI4_MAX_CONTEXT - 1000  # leave headroom for prompt and response
 
     if total_tokens > max_safe_tokens:
-        # Truncate to fit safely under the context limit
-        logging.warning(f"[process_batch] Batch {batch_id} too large ({total_tokens} tokens). "
-                        f"Truncating to {max_safe_tokens}.")
-        truncated_ratio = max_safe_tokens / total_tokens
-        cutoff_chars = int(len(joined_text) * truncated_ratio)
+        # Calculate a more conservative truncation
+        safe_ratio = (max_safe_tokens - 1000) / total_tokens  # Extra 1000 token safety margin
+        cutoff_chars = int(len(joined_text) * safe_ratio)
+        
+        # Try to cut at a sentence boundary
+        if cutoff_chars < len(joined_text):
+            # Look for last sentence boundary
+            for marker in [". ", "! ", "? ", "\n", ". \n"]:
+                last_boundary = joined_text[:cutoff_chars].rfind(marker)
+                if last_boundary != -1 and last_boundary > cutoff_chars * 0.8:  # At least 80% of content
+                    cutoff_chars = last_boundary + 1
+                    break
+                    
         joined_text = joined_text[:cutoff_chars]
+        logging.warning(f"[process_batch] Batch {batch_id} ({total_tokens} tokens) truncated to fit context window.")
 
     prompt = f"""Analyze the following text and provide a structured summary, sentiment, and key topics.
 
@@ -193,20 +215,51 @@ def combined_analysis(llm, partial_results, token_budget_single_call=PHI4_MAX_CO
                      stream_llm_if_supported=True, custom_stream_handler=None):
     """
     Performs a combined analysis on the input data.
-    Directly uses the cache data without sanitization.
+    Now expects a clean list of result strings.
     """
-    # Debug: Print what we received
-    logging.info(f"Received {len(partial_results)} partial results")
+    # Log what we received
+    logging.info(f"Received partial results of type: {type(partial_results)}")
     
-    # Extract all results from partial_results, including error messages
-    all_results = []
-    for key, value in partial_results.items():
-        if isinstance(value, dict) and 'result' in value:
-            all_results.append(value['result'])
-        elif isinstance(value, str):
-            all_results.append(value)
+    try:
+        # Ensure we have a list of strings
+        all_results = []
+        
+        if isinstance(partial_results, (list, tuple)):
+            # Filter and clean the results
+            for item in partial_results:
+                if isinstance(item, str) and item.strip():
+                    # Skip any items that look like errors
+                    if not (item.startswith('ERROR:') or 'exceed context window' in item.lower()):
+                        all_results.append(item.strip())
+                elif isinstance(item, dict) and 'result' in item:
+                    result = item['result']
+                    if isinstance(result, str) and result.strip():
+                        if not (result.startswith('ERROR:') or 'exceed context window' in result.lower()):
+                            all_results.append(result.strip())
+                            
+        elif isinstance(partial_results, dict):
+            # Extract results from dictionary values
+            for value in partial_results.values():
+                if isinstance(value, str) and value.strip():
+                    if not (value.startswith('ERROR:') or 'exceed context window' in value.lower()):
+                        all_results.append(value.strip())
+                elif isinstance(value, dict) and 'result' in value:
+                    result = value['result']
+                    if isinstance(result, str) and result.strip():
+                        if not (result.startswith('ERROR:') or 'exceed context window' in result.lower()):
+                            all_results.append(result.strip())
         else:
-            logging.warning(f"Unexpected type in partial_results for {key}: {type(value)}")
+            # Single item case
+            if isinstance(partial_results, str) and partial_results.strip():
+                if not (partial_results.startswith('ERROR:') or 'exceed context window' in partial_results.lower()):
+                    all_results.append(partial_results.strip())
+                    
+        if not all_results:
+            return "ERROR: No valid analysis results to combine."
+            
+    except Exception as e:
+        logging.error(f"Error processing partial results: {e}")
+        return f"ERROR: Failed to process analysis results: {str(e)}"
     
     # Join all results
     joined_text = "\n\n".join(all_results)
@@ -290,28 +343,64 @@ def combined_analysis_V2(llm, partial_results, token_budget_single_call=PHI4_MAX
                      stream_llm_if_supported=True, custom_stream_handler=None):
     """
     Performs a combined analysis (summarization, sentiment, topics) on the input data.
-    Modified to support custom stream handlers.
+    Modified to support custom stream handlers with enhanced error handling.
     """
-    # Accept partial_results as either a dict (id->item), a list of items, or a single string
+    # Enhanced partial results processing with validation
     results_list = []
-    if isinstance(partial_results, dict):
-        for k, v in partial_results.items():
-            if isinstance(v, dict):
-                results_list.append(v.get('result', '') or '')
-            elif isinstance(v, str):
-                results_list.append(v)
-            else:
-                results_list.append(str(v))
-    elif isinstance(partial_results, list):
-        for item in partial_results:
-            if isinstance(item, dict):
-                results_list.append(item.get('result', '') or '')
-            elif isinstance(item, str):
-                results_list.append(item)
-            else:
-                results_list.append(str(item))
-    else:
-        results_list = [str(partial_results)]
+    
+    def extract_result(item):
+        """Helper to safely extract result from various formats"""
+        if item is None:
+            return None
+        if isinstance(item, dict):
+            # Try multiple common result keys
+            for key in ['result', 'text', 'content', 'analysis']:
+                if key in item:
+                    value = item[key]
+                    if value and isinstance(value, str):
+                        return value.strip()
+            # If no recognized keys, try to convert whole dict to string
+            return str(item)
+        if isinstance(item, str):
+            return item.strip()
+        return str(item)
+    
+    try:
+        if isinstance(partial_results, dict):
+            for k, v in partial_results.items():
+                result = extract_result(v)
+                if result:
+                    results_list.append(result)
+                    
+        elif isinstance(partial_results, (list, tuple)):
+            for item in partial_results:
+                result = extract_result(item)
+                if result:
+                    results_list.append(result)
+                    
+        else:
+            result = extract_result(partial_results)
+            if result:
+                results_list.append(result)
+                
+        # Remove any items that look like errors or empty content
+        results_list = [r for r in results_list if r and 
+                       not r.startswith('ERROR:') and
+                       not 'exceed context window' in r.lower() and
+                       len(r.strip()) > 0]
+                       
+        if not results_list:
+            logging.warning("No valid results found in partial_results")
+            return json.dumps({"multiverse_combined": {"error": "No valid partial results found for analysis"}})
+            
+    except Exception as e:
+        logging.error(f"Error processing partial results: {e}")
+        return json.dumps({
+            "multiverse_combined": {
+                "error": f"Failed to process partial results: {str(e)}",
+                "details": "Exception occurred while extracting results"
+            }
+        })
 
     joined_text = "\n\n".join([r for r in results_list if r])
     
@@ -391,32 +480,61 @@ If you not got the text for the analysis, respond with an empty structure with z
     
     # Try to extract valid JSON from the response
     try:
-        # Find the start of JSON object
-        start_idx = response.find('{')
+        # Clean the response first
+        clean_response = response.strip()
+        
+        # Remove any non-JSON prefix
+        start_idx = clean_response.find('{')
         if start_idx == -1:
             raise ValueError("No JSON object found in response")
+        clean_response = clean_response[start_idx:]
         
-        # Find the end of JSON object
+        # Find matching closing brace
         brace_count = 0
         end_idx = -1
-        for i in range(start_idx, len(response)):
-            if response[i] == '{':
-                brace_count += 1
-            elif response[i] == '}':
-                brace_count -= 1
-                if brace_count == 0:
-                    end_idx = i
-                    break
+        in_string = False
+        escape_next = False
+        
+        for i, char in enumerate(clean_response):
+            if escape_next:
+                escape_next = False
+                continue
+                
+            if char == '\\':
+                escape_next = True
+                continue
+                
+            if char == '"' and not escape_next:
+                in_string = not in_string
+                continue
+                
+            if not in_string:  # Only count braces outside strings
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        end_idx = i
+                        break
         
         if end_idx == -1:
             raise ValueError("Incomplete JSON object")
         
         # Extract the JSON
-        json_str = response[start_idx:end_idx+1]
+        json_str = clean_response[:end_idx + 1]
+        
+        # Try to fix common JSON issues
+        json_str = json_str.replace('\n', ' ').replace('\r', '')
+        json_str = re.sub(r'(?<!\\)"(?![:,}\]])', '\\"', json_str)  # Escape unescaped quotes
+        json_str = re.sub(r',\s*([}\]])', r'\1', json_str)  # Remove trailing commas
         
         # Validate that it's valid JSON
         parsed_json = json.loads(json_str)
-        return json_str
+        
+        # Ensure the expected structure
+        if "multiverse_combined" not in parsed_json:
+            parsed_json = {"multiverse_combined": parsed_json}
+            json_str = json.dumps(parsed_json)
         
     except (ValueError, json.JSONDecodeError) as e:
         logging.error(f"Failed to extract valid JSON from response: {e}")
