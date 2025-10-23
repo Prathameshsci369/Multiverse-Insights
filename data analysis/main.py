@@ -23,7 +23,8 @@ from config import (
 )
 from utils import (
     load_json, extract_texts, chunk_texts, create_processing_batches,
-    translate, get_free_memory_mb, validate_and_reprocess_chunks, validate_batches
+    translate, get_free_memory_mb, validate_and_reprocess_chunks, validate_batches,
+    process_json_to_batches, estimate_tokens
 )
 from model_manager import SingleModelManager
 from analysis import process_batch, combined_analysis
@@ -46,20 +47,38 @@ FAILED_BATCHES_JSON = "failed_batches_main.json"
 def get_original_batch(batch_id, original_batches):
     """
     Retrieve the original batch data for a given batch_id.
+    Handles both legacy format and new JSON batch format.
     """
     try:
-        # Extract the numeric part from batch_id (e.g., "Batch 0" -> 0)
-        batch_num = int(batch_id.split()[-1])
-        return original_batches[batch_num]
-    except (ValueError, IndexError):
-        logging.error(f"Could not parse batch_id: {batch_id}")
+        # Extract the numeric part from batch_id (e.g., "Batch 0" -> 0 or "batch_1" -> 1)
+        batch_num = int(''.join(filter(str.isdigit, batch_id)))
+        
+        if batch_num < len(original_batches):
+            batch = original_batches[batch_num]
+            # Convert to consistent format
+            if isinstance(batch, dict) and 'content' in batch:
+                return batch['content']
+            elif isinstance(batch, (list, str)):
+                return batch
+        
+        logging.error(f"Batch {batch_num} not found in original_batches")
+        return None
+    except (ValueError, IndexError) as e:
+        logging.error(f"Could not parse batch_id {batch_id}: {e}")
         return None
 
 def process_batch_with_limit(llm_manager, batch, batch_id, max_tokens):
     """
     Process a batch with a specific token limit.
+    Handles batches in the new format where they may be a string or list of chunks.
     """
-    joined_text = " ".join(batch)
+    # Convert batch to text content
+    if isinstance(batch, list):
+        joined_text = "\n\n".join(batch)
+    elif isinstance(batch, str):
+        joined_text = batch
+    else:
+        joined_text = str(batch)
     
     # Estimate tokens and truncate if necessary
     total_tokens = estimate_tokens(joined_text)
@@ -76,11 +95,22 @@ def process_batch_with_limit(llm_manager, batch, batch_id, max_tokens):
 Text:
 {joined_text}
 
----
-Report:
-- Summary:
-- Sentiment:
-- Topics:
+===BEGIN ANALYSIS===
+
+1. SUMMARY:
+[Write 2-3 sentences summarizing the key points]
+
+2. SENTIMENT:
+- Positive: [X]% - [brief explanation]
+- Negative: [X]% - [brief explanation]
+- Neutral: [X]% - [brief explanation]
+
+3. KEY THEMES:
+- Theme 1: [brief description]
+- Theme 2: [brief description]
+- Theme 3: [brief description]
+
+===END ANALYSIS===
 """
     
     try:
@@ -152,61 +182,42 @@ def main(json_path: str = JSON_PATH):
             
             # --- Steps 2 through 7 (Full Run) ---
             
-            # Step 2: Load and preprocess data
-            original_data = load_json(json_path)
-            all_texts = extract_texts(original_data)
-            
-            # Step 3: Chunk texts for context
-            chunks = chunk_texts(all_texts, CHUNK_SIZE, CHUNK_OVERLAP)
-            
-            # Validate and reprocess any chunks that are too large
-            chunks = validate_and_reprocess_chunks(chunks, PHI4_MAX_CONTEXT - 3000)
-            
-            # Step 4: Create processing batches for the LLM
-            batches = create_processing_batches(chunks, PHI4_MAX_CONTEXT)
-            
-            # Validate batches
-            valid_batches, oversized_batches = validate_batches(batches, PHI4_MAX_CONTEXT - 3000)
-            
-            # If there are oversized batches, reprocess them
-            if oversized_batches:
-                logging.info(f"Reprocessing {len(oversized_batches)} oversized batches...")
-                for batch_id, batch, tokens in oversized_batches:
-                    # Split the batch into smaller chunks
-                    new_chunks = []
-                    for chunk in batch:
-                        chunk_tokens = estimate_tokens(chunk)
-                        if chunk_tokens > PHI4_MAX_CONTEXT - 3000:
-                            # Split this chunk
-                            words = chunk.split()
-                            sub_chunk = []
-                            sub_chunk_tokens = 0
-                            
-                            for word in words:
-                                word_tokens = estimate_tokens(word)
-                                if sub_chunk_tokens + word_tokens <= PHI4_MAX_CONTEXT - 3000:
-                                    sub_chunk.append(word)
-                                    sub_chunk_tokens += word_tokens
-                                else:
-                                    if sub_chunk:
-                                        new_chunks.append(" ".join(sub_chunk))
-                                    sub_chunk = [word]
-                                    sub_chunk_tokens = word_tokens
-                            
-                            if sub_chunk:
-                                new_chunks.append(" ".join(sub_chunk))
-                        else:
-                            new_chunks.append(chunk)
-                    
-                    # Create new batches from the reprocessed chunks
-                    new_batches = create_processing_batches(new_chunks, PHI4_MAX_CONTEXT)
-                    valid_batches.extend(new_batches)
+            # Step 2: Process input JSON into batches using the new utility
+            temp_batches_file = "temp_batches.json"
+            try:
+                logging.info("Processing input JSON into batches...")
+                num_batches = process_json_to_batches(
+                    json_path,
+                    temp_batches_file,
+                    max_tokens_per_batch=PHI4_MAX_CONTEXT - 3000  # Reserve space for prompt
+                )
+                logging.info(f"Successfully created {num_batches} batches")
                 
-                logging.info(f"After reprocessing, total batches: {len(valid_batches)}")
-            
-            # Use valid_batches for processing
-            batches = valid_batches
-            original_batches = batches.copy()  # Store for potential retry
+                # Load the processed batches
+                with open(temp_batches_file, 'r', encoding='utf-8') as f:
+                    batches_data = json.load(f)
+                
+                # Convert the batches data into the format expected by the rest of the pipeline
+                batches = []
+                for batch_entry in batches_data["batches"]:
+                    # Split the content into chunks at natural breaks
+                    batch_chunks = batch_entry["content"].split("\n\n")
+                    batches.append(batch_chunks)
+                
+                original_batches = batches.copy()  # Store for potential retry
+                
+                logging.info(f"Loaded {len(batches)} batches for processing")
+                
+            except Exception as e:
+                logging.error(f"Error processing input JSON into batches: {e}")
+                raise
+            finally:
+                # Clean up temporary files
+                if os.path.exists(temp_batches_file):
+                    try:
+                        os.remove(temp_batches_file)
+                    except Exception as e:
+                        logging.warning(f"Could not remove temporary file {temp_batches_file}: {e}")
             
             # Step 5: Initialize Model Managers
             model_managers = []
@@ -283,33 +294,66 @@ def main(json_path: str = JSON_PATH):
             
             # --- End of Full Run ---
             
+        # main.py
+
+# ... (around line 245, before Step 8)
+
         # ----------------------------------------------------
         # Step 8: Generate the final report
         # ----------------------------------------------------
         
+        # Initialize cache directory if it doesn't exist
+        cache_dir = os.path.join(os.path.dirname(PARTIAL_RESULTS_JSON), "cache")
+        os.makedirs(cache_dir, exist_ok=True)
+        
         # Filter out batches that failed or contain explicit error messages
-        safe_partial_results = {}
+        final_results_list = [] # <-- NEW: Change to a list of strings for minimal input
+        
+        # First, validate partial results structure
+        if not partial_results:
+            logging.warning("No partial results found. Creating new cache structure.")
+            partial_results = {}
+        
         for key, value in partial_results.items():
             # Ensure we're working with dictionaries
             if not isinstance(value, dict):
                 value = {"batch_id": key, "result": str(value)}
             
-            # Check for explicit 'error' key or if 'result' contains an error string
+            # More robust error detection
             is_error_batch = False
+            result_content = value.get('result', '')
             
-            if 'error' in value:
-                is_error_batch = True
-            elif isinstance(value.get('result'), str) and value.get('result').startswith('ERROR:'):
-                 is_error_batch = True
+            # Check various error conditions
+            error_indicators = [
+                lambda x: 'error' in value,
+                lambda x: isinstance(x, str) and x.startswith('ERROR:'),
+                lambda x: isinstance(x, str) and 'exceed context window' in x.lower(),
+                lambda x: x is None or x == 'None',
+                lambda x: isinstance(x, str) and len(x.strip()) < 10  # Too short to be valid
+            ]
+            
+            for check in error_indicators:
+                if check(result_content):
+                    is_error_batch = True
+                    break
             
             if is_error_batch:
-                logging.warning(f"Skipping error batch {key} for final combined analysis.")
+                logging.warning(f"Skipping error batch {key} for final combined analysis. Reason: {result_content[:100]}...")
             else:
-                safe_partial_results[key] = value
+                # Only include non-error results
+                if isinstance(result_content, str) and len(result_content.strip()) > 0:
+                    final_results_list.append(result_content)
         
         # Check if we have enough successful batches
-        if len(safe_partial_results) < len(partial_results) * 0.3:
-            logging.error(f"Too many batches failed: {len(safe_partial_results)}/{len(partial_results)} successful.")
+        total_batches = len(partial_results)
+        successful_batches = len(final_results_list)
+        
+        if successful_batches == 0:
+             logging.error("No successful batches available for final combined analysis.")
+             return "ERROR: No successful batch analyses to generate final report."
+        
+        if successful_batches < total_batches * 0.3:
+            logging.error(f"Too many batches failed: {successful_batches}/{total_batches} successful.")
             logging.error("Consider reducing the context limit and retrying the analysis.")
         
         # Ensure we have a model manager available for the final combined analysis
@@ -318,11 +362,19 @@ def main(json_path: str = JSON_PATH):
 
         logging.info("Generating the final report...")
         
-        # Pass the SAFE, filtered results to combined_analysis
-        raw_analysis_output = combined_analysis(model_managers[0], safe_partial_results, stream_llm_if_supported=True)
+        # Pass the SAFE, filtered LIST OF STRINGS to combined_analysis
+        # The combined_analysis function will then join this list into one clean text corpus.
+        raw_analysis_output = combined_analysis(
+            model_managers[0], 
+            # Passing the list of ONLY the 'result' strings:
+            final_results_list, 
+            stream_llm_if_supported=True
+        )
         
         logging.info("Final report generation complete.")
         return raw_analysis_output
+
+# ... (rest of main.py)
 
     except Exception as e:
         logging.error(f"Pipeline failed at a high level: {e}")
