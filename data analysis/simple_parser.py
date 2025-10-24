@@ -20,6 +20,19 @@ class SimpleParser:
         if self.debug:
             print(f"[DEBUG] First 500 chars of text: {text[:500]}")
         
+        # FIX: Handle the specific case where the model outputs without proper section separators
+        # First, let's find the actual EXECUTIVE_SUMMARY section
+        # Look for the first occurrence of EXECUTIVE_SUMMARY:
+        exec_pos = text.find("EXECUTIVE_SUMMARY:")
+        if exec_pos > 0:
+            # Extract everything from EXECUTIVE_SUMMARY: onwards
+            text = text[exec_pos:]
+            self.debug_print("Cleaned up text to start from EXECUTIVE_SUMMARY:")
+        
+        # FIX: Add section markers to help with parsing
+        # Replace patterns like "SENTIMENT" with "SENTIMENT:" to ensure consistent formatting
+        text = re.sub(r'\n(SENTIMENT|TOPICS|ENTITIES|RELATIONSHIPS|ANOMALIES|CONTROVERSY_SCORE)(?!\:)', r'\n\1:', text)
+        
         # Try multiple patterns for executive summary
         # Pattern 1: Standard format with EXECUTIVE_SUMMARY:
         exec_match = re.search(r'EXECUTIVE_SUMMARY:\s*\n?(.*?)(?=\nSENTIMENT:|\nTOPICS:|\nENTITIES:|\nRELATIONSHIPS:|\nANOMALIES:|\nCONTROVERSY_SCORE:|\Z)', text, re.DOTALL | re.IGNORECASE)
@@ -32,7 +45,11 @@ class SimpleParser:
         if not exec_match:
             exec_match = re.search(r'Executive\s*summary\s*[:\-]?\s*\n?(.*?)(?=\nSENTIMENT:|\nTOPICS:|\nENTITIES:|\nRELATIONSHIPS:|\nANOMALIES:|\nCONTROVERSY_SCORE:|\Z)', text, re.DOTALL | re.IGNORECASE)
         
-        # Pattern 4: If none of the above work, try to extract the first paragraph as executive summary
+        # Pattern 4: Handle the case where EXECUTIVE_SUMMARY is followed by content without a newline
+        if not exec_match:
+            exec_match = re.search(r'EXECUTIVE_SUMMARY:\s*(.*?)(?=\nSENTIMENT|\nTOPICS|\nENTITIES|\nRELATIONSHIPS|\nANOMALIES|\nCONTROVERSY_SCORE|\Z)', text, re.DOTALL | re.IGNORECASE)
+        
+        # Pattern 5: If none of the above work, try to extract the first paragraph as executive summary
         if not exec_match:
             # Look for the first non-empty line that doesn't start with a section header
             lines = text.split('\n')
@@ -52,11 +69,35 @@ class SimpleParser:
                 self.debug_print("Extracted executive summary from first paragraph")
         
         if exec_match:
-            result["multiverse_combined"]["executive_summary"] = exec_match.group(1).strip()
+            # FIX: Limit the executive summary to a reasonable length
+            exec_text = exec_match.group(1).strip()
+            # If the executive summary is too long, it might include other sections
+            if len(exec_text) > 500:
+                # Try to find where the executive summary actually ends
+                # Look for patterns that indicate the start of the next section
+                next_section_patterns = [
+                    r'\nSENTIMENT:',
+                    r'\nTOPICS:',
+                    r'\nENTITIES:',
+                    r'\nRELATIONSHIPS:',
+                    r'\nANOMALIES:',
+                    r'\nCONTROVERSY_SCORE:'
+                ]
+                
+                for pattern in next_section_patterns:
+                    match = re.search(pattern, exec_text, re.IGNORECASE)
+                    if match:
+                        exec_text = exec_text[:match.start()].strip()
+                        break
+            
+            result["multiverse_combined"]["executive_summary"] = exec_text
             self.debug_print("Extracted executive summary")
         
-        # Parse sentiment analysis
+        # Parse sentiment analysis - handle both "SENTIMENT:" and "SENTIMENT" without colon
         sentiment_match = re.search(r'SENTIMENT:\s*\n?(.*?)(?=\nTOPICS:|\nENTITIES:|\nRELATIONSHIPS:|\nANOMALIES:|\nCONTROVERSY_SCORE:|\Z)', text, re.DOTALL | re.IGNORECASE)
+        if not sentiment_match:
+            sentiment_match = re.search(r'SENTIMENT\s*\n?(.*?)(?=\nTOPICS|\nENTITIES|\nRELATIONSHIPS|\nANOMALIES|\nCONTROVERSY_SCORE|\Z)', text, re.DOTALL | re.IGNORECASE)
+        
         if sentiment_match:
             sentiment_text = sentiment_match.group(1).strip()
             self.debug_print(f"[SENT-DBG] Found sentiment section: {sentiment_text}")
@@ -66,6 +107,9 @@ class SimpleParser:
             
             # Pattern for "X% - Reasoning" format
             pos_match = re.search(r'Positive:\s*(\d+)%\s*-\s*(.*?)(?=Negative:|Neutral:|$)', sentiment_text, re.IGNORECASE | re.DOTALL)
+            if not pos_match:
+                pos_match = re.search(r'Positive\s*(\d+)%\s*-\s*(.*?)(?=Negative|Neutral|$)', sentiment_text, re.IGNORECASE | re.DOTALL)
+            
             if pos_match:
                 sentiment_data["positive"] = {
                     "percentage": int(pos_match.group(1)),
@@ -74,6 +118,9 @@ class SimpleParser:
                 self.debug_print(f"[SENT-DBG] Extracted positive: {pos_match.group(1)}% - {pos_match.group(2).strip()}")
             
             neg_match = re.search(r'Negative:\s*(\d+)%\s*-\s*(.*?)(?=Positive:|Neutral:|$)', sentiment_text, re.IGNORECASE | re.DOTALL)
+            if not neg_match:
+                neg_match = re.search(r'Negative\s*(\d+)%\s*-\s*(.*?)(?=Positive|Neutral|$)', sentiment_text, re.IGNORECASE | re.DOTALL)
+            
             if neg_match:
                 sentiment_data["negative"] = {
                     "percentage": int(neg_match.group(1)),
@@ -82,6 +129,9 @@ class SimpleParser:
                 self.debug_print(f"[SENT-DBG] Extracted negative: {neg_match.group(1)}% - {neg_match.group(2).strip()}")
             
             neu_match = re.search(r'Neutral:\s*(\d+)%\s*-\s*(.*?)(?=Positive:|Negative:|$)', sentiment_text, re.IGNORECASE | re.DOTALL)
+            if not neu_match:
+                neu_match = re.search(r'Neutral\s*(\d+)%\s*-\s*(.*?)(?=Positive|Negative|$)', sentiment_text, re.IGNORECASE | re.DOTALL)
+            
             if neu_match:
                 sentiment_data["neutral"] = {
                     "percentage": int(neu_match.group(1)),
@@ -92,8 +142,11 @@ class SimpleParser:
             result["multiverse_combined"]["sentiment_analysis"] = sentiment_data
             self.debug_print("Extracted sentiment analysis")
         
-        # Parse topics
+        # Parse topics - handle both "TOPICS:" and "TOPICS" without colon
         topics_match = re.search(r'TOPICS:\s*\n?(.*?)(?=\nENTITIES:|\nRELATIONSHIPS:|\nANOMALIES:|\nCONTROVERSY_SCORE:|\Z)', text, re.DOTALL | re.IGNORECASE)
+        if not topics_match:
+            topics_match = re.search(r'TOPICS\s*\n?(.*?)(?=\nENTITIES|\nRELATIONSHIPS|\nANOMALIES|\nCONTROVERSY_SCORE|\Z)', text, re.DOTALL | re.IGNORECASE)
+        
         if topics_match:
             topics_text = topics_match.group(1).strip()
             # Extract topics using bullet points or numbered lists
@@ -105,15 +158,23 @@ class SimpleParser:
                 topics = re.findall(r'\d+\.\s*(.*?)(?=\n\d+\.|\n\n|\Z)', topics_text, re.DOTALL)
                 topics = [t.strip() for t in topics if t.strip()]
             
-            # If still no topics, split by newlines
+            # If still no topics, split by newlines or spaces
             if not topics:
+                # Try to split by newlines first
                 topics = [line.strip() for line in topics_text.split('\n') if line.strip()]
+                
+                # If still no topics, split by spaces (for space-separated topics)
+                if len(topics) == 1 and ' ' in topics[0]:
+                    topics = topics[0].split()
             
             result["multiverse_combined"]["topics"] = topics
             self.debug_print(f"Extracted {len(topics)} topics")
         
-        # Parse entities
+        # Parse entities - handle both "ENTITIES:" and "ENTITIES" without colon
         entities_match = re.search(r'ENTITIES:\s*\n?(.*?)(?=\nRELATIONSHIPS:|\nANOMALIES:|\nCONTROVERSY_SCORE:|\Z)', text, re.DOTALL | re.IGNORECASE)
+        if not entities_match:
+            entities_match = re.search(r'ENTITIES\s*\n?(.*?)(?=\nRELATIONSHIPS|\nANOMALIES|\nCONTROVERSY_SCORE|\Z)', text, re.DOTALL | re.IGNORECASE)
+        
         if entities_match:
             entities_text = entities_match.group(1).strip()
             # Extract entities using bullet points or numbered lists
@@ -125,15 +186,23 @@ class SimpleParser:
                 entities = re.findall(r'\d+\.\s*(.*?)(?=\n\d+\.|\n\n|\Z)', entities_text, re.DOTALL)
                 entities = [e.strip() for e in entities if e.strip()]
             
-            # If still no entities, split by newlines
+            # If still no entities, split by newlines or spaces
             if not entities:
+                # Try to split by newlines first
                 entities = [line.strip() for line in entities_text.split('\n') if line.strip()]
+                
+                # If still no entities, split by spaces (for space-separated entities)
+                if len(entities) == 1 and ' ' in entities[0]:
+                    entities = entities[0].split()
             
             result["multiverse_combined"]["entity_recognition"] = entities
             self.debug_print(f"Extracted {len(entities)} entities")
         
-        # Parse relationships
+        # Parse relationships - handle both "RELATIONSHIPS:" and "RELATIONSHIPS" without colon
         relationships_match = re.search(r'RELATIONSHIPS:\s*\n?(.*?)(?=\nANOMALIES:|\nCONTROVERSY_SCORE:|\Z)', text, re.DOTALL | re.IGNORECASE)
+        if not relationships_match:
+            relationships_match = re.search(r'RELATIONSHIPS\s*\n?(.*?)(?=\nANOMALIES|\nCONTROVERSY_SCORE|\Z)', text, re.DOTALL | re.IGNORECASE)
+
         if relationships_match:
             relationships_text = relationships_match.group(1).strip()
             # Extract relationships using bullet points or numbered lists
@@ -174,11 +243,36 @@ class SimpleParser:
                         # Format: "Entity: Description"
                         colon_match = re.match(r'(.+?):\s*(.+)', rel)
                         if colon_match:
-                            parsed_relationships.append({
-                                "entity1": colon_match.group(1).strip(),
-                                "entity2": None,
-                                "relationship": colon_match.group(2).strip()
-                            })
+                            # Check if this is actually a relationship with two entities
+                            # Look for patterns like "Entity1 -> Entity2: Description" but without the arrow
+                            parts = colon_match.group(2).split(':', 1)
+                            if len(parts) == 2:
+                                # This might be "Entity1 -> Entity2: Description" but the parser missed it
+                                entity1 = colon_match.group(1).strip()
+                                entity2_desc = parts[0].strip()
+                                description = parts[1].strip()
+                                
+                                # Check if entity2_desc looks like an entity
+                                if entity2_desc and len(entity2_desc.split()) <= 5:  # Likely an entity if short
+                                    parsed_relationships.append({
+                                        "entity1": entity1,
+                                        "entity2": entity2_desc,
+                                        "relationship": description
+                                    })
+                                else:
+                                    # Just a regular entity with description
+                                    parsed_relationships.append({
+                                        "entity1": entity1,
+                                        "entity2": None,
+                                        "relationship": colon_match.group(2).strip()
+                                    })
+                            else:
+                                # Just a regular entity with description
+                                parsed_relationships.append({
+                                    "entity1": colon_match.group(1).strip(),
+                                    "entity2": None,
+                                    "relationship": colon_match.group(2).strip()
+                                })
                         else:
                             # Just a description, no entities
                             parsed_relationships.append({
@@ -190,8 +284,11 @@ class SimpleParser:
             result["multiverse_combined"]["relationship_extraction"] = parsed_relationships
             self.debug_print(f"Extracted {len(parsed_relationships)} relationships")
         
-        # Parse anomalies
+        # Parse anomalies - handle both "ANOMALIES:" and "ANOMALIES" without colon
         anomalies_match = re.search(r'ANOMALIES:\s*\n?(.*?)(?=\nCONTROVERSY_SCORE:|\Z)', text, re.DOTALL | re.IGNORECASE)
+        if not anomalies_match:
+            anomalies_match = re.search(r'ANOMALIES\s*\n?(.*?)(?=\nCONTROVERSY_SCORE|\Z)', text, re.DOTALL | re.IGNORECASE)
+        
         if anomalies_match:
             anomalies_text = anomalies_match.group(1).strip()
             # Check if no anomalies were detected
@@ -222,15 +319,27 @@ class SimpleParser:
             
             self.debug_print(f"Extracted {len(result['multiverse_combined']['anomaly_detection'])} anomalies")
         
-        # Parse controversy score
+        # Parse controversy score - handle both "CONTROVERSY_SCORE:" and "CONTROVERSY_SCORE" without colon
         controversy_match = re.search(r'CONTROVERSY_SCORE:\s*\n?(.*?)(?=\Z)', text, re.DOTALL | re.IGNORECASE)
+        if not controversy_match:
+            controversy_match = re.search(r'CONTROVERSY_SCORE\s*\n?(.*?)(?=\Z)', text, re.DOTALL | re.IGNORECASE)
+        
         if controversy_match:
             controversy_text = controversy_match.group(1).strip()
             # Extract score and explanation
             score_match = re.search(r'(\d+\.?\d*)\s*/\s*(\d+\.?\d*)\s*-\s*(.+)', controversy_text)
+            if not score_match:
+                # Try to match just a number without the denominator
+                score_match = re.search(r'(\d+\.?\d*)\s*-\s*(.+)', controversy_text)
+            
             if score_match:
-                score = float(score_match.group(1)) / float(score_match.group(2))
-                explanation = score_match.group(3).strip()
+                if len(score_match.groups()) == 3:
+                    score = float(score_match.group(1)) / float(score_match.group(2))
+                    explanation = score_match.group(3).strip()
+                else:
+                    score = float(score_match.group(1))
+                    explanation = score_match.group(2).strip()
+                
                 result["multiverse_combined"]["controversy_score"] = {
                     "value": score,
                     "explanation": explanation
