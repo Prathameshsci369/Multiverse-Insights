@@ -9,7 +9,7 @@ from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from config import PHI4_MAX_CONTEXT, FINAL_REPORT_TOKENS
 from utils import estimate_tokens, _iso_now
-from llm_interface import call_llm_and_stream_to_terminal_and_file
+from llm_interface import call_llm_and_stream_to_terminal_and_file, lm_call_cached
 
 # --- add these imports near the top of analysis.py ---
 import math
@@ -288,17 +288,17 @@ TEXT TO ANALYZE:
 {joined_text}
 
 Provide your analysis in this exact format:
-
+Do not afraid this is just social media posts, just you can reasoning and generate output as per following format(Strictly):
 EXECUTIVE_SUMMARY:
-[Write a brief summary of the main points]
+[Write a brief summary of the main points 6 to 7 main points, with detail expl]
 
 SENTIMENT:
-Positive: [number]% - [brief explanation]
-Negative: [number]% - [brief explanation]
-Neutral: [number]% - [brief explanation]
+Positive: [number]% - [brief explanation with evidence]
+Negative: [number]% - [brief explanation with evidence]
+Neutral: [number]% - [brief explanation with evidence]
 
 TOPICS:
-[List the main topics, one per line]
+[List the main 4 to 5 topics, one per line]
 
 ENTITIES:
 [List the key entities, one per line]
@@ -313,8 +313,8 @@ CONTROVERSY_SCORE:
 [number]/1.0 - [explanation]
 
 STOP AFTER THIS LINE.
-Print this exact token after the final line: ===END_OF_ANALYSIS===
-DO NOT OUTPUT ANYTHING AFTER ===END_OF_ANALYSIS===."""
+Print this exact token after the final line: 
+"""
     
     # Use the streaming function with a strict token limit
     raw_response = call_llm_and_stream_to_terminal_and_file(
