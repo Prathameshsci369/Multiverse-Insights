@@ -1,4 +1,5 @@
-# streamlit_app.py
+# streamlit_app1.py
+
 import streamlit as st
 import os
 import tempfile
@@ -9,6 +10,12 @@ import shutil
 # Import your analysis functions
 from main2 import combine_analysis
 from simple_parser import parse_simple_format
+from reddit import RedditScraper
+from advance_twitter import TwitterScraper
+from youtube import YouTubeScraper  # Add this import
+import json
+import os
+from datetime import datetime
 
 # Configure the page
 st.set_page_config(
@@ -54,34 +61,54 @@ st.markdown("""
     }
     .entity-tag {
         display: inline-block;
-        background-color: #000000;  /* Changed to black */
-        color: #ffffff;  /* Changed text to white for readability */
-        padding: 0.25rem 0.5rem;
-        margin: 0.25rem;
-        border-radius: 0.25rem;
-        font-size: 0.9rem;
-    }
-    .topic-tag {
-        display: inline-block;
-        background-color: #000000;  /* Changed to black */
-        color: #ffffff;  /* Changed text to white for readability */
+        background-color: #000000;
+        color: #ffffff;
         padding: 0.25rem 0.5rem;
         margin: 0.25rem;
         border-radius: 0.25rem;
         font-size: 0.9rem;
     }
     .relationship-card {
-        background-color: #000000;  /* Changed to black */
-        color: #ffffff;  /* Changed text to white for readability */
+        background-color: #1a1a1a;
+        color: #ffffff;
         padding: 1rem;
         border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #4a90e2;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .relationship-header {
+        display: flex;
+        align-items: center;
         margin-bottom: 0.5rem;
-        border-left: 4px solid #1f77b4;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-weight: bold;
+    }
+    .relationship-source {
+        color: #4a90e2;
+    }
+    .relationship-arrow {
+        margin: 0 0.5rem;
+        color: #888888;
+    }
+    .relationship-target {
+        color: #4a90e2;
+    }
+    .relationship-description {
+        font-size: 0.9rem;
+        color: #cccccc;
+    }
+    .topic-tag {
+        display: inline-block;
+        background-color: #000000;
+        color: #ffffff;
+        padding: 0.25rem 0.5rem;
+        margin: 0.25rem;
+        border-radius: 0.25rem;
+        font-size: 0.9rem;
     }
     .anomaly-card {
-        background-color: #000000;  /* Changed to black background */
-        color: #ffffff;  /* White text for readability */
+        background-color: #000000;
+        color: #ffffff;
         padding: 1rem;
         border-radius: 0.5rem;
         margin-bottom: 0.5rem;
@@ -168,6 +195,55 @@ def display_sentiment_analysis(sentiment_data):
         </div>
         ''', unsafe_allow_html=True)
 
+def display_entities(entities):
+    """Display entities as bullet points"""
+    if not entities:
+        st.info("No entities identified")
+        return
+    
+    # Debug information
+    if st.session_state.get('debug_mode', False):
+        st.write(f"Debug: entities type: {type(entities)}")
+        st.write(f"Debug: entities content: {entities}")
+    
+    # Handle different formats of entities
+    if isinstance(entities, list):
+        for entity in entities:
+            if isinstance(entity, str):
+                # Check if the entity contains a description (separated by -)
+                if " - " in entity:
+                    parts = entity.split(" - ", 1)
+                    if len(parts) == 2:
+                        name = parts[0].strip()
+                        description = parts[1].strip()
+                        st.markdown(f'<span class="entity-tag">{name}: {description}</span>', unsafe_allow_html=True)
+                    else:
+                        st.markdown(f'<span class="entity-tag">{entity}</span>', unsafe_allow_html=True)
+                else:
+                    # Just a plain entity name
+                    st.markdown(f'<span class="entity-tag">{entity}</span>', unsafe_allow_html=True)
+            elif isinstance(entity, dict):
+                if "name" in entity and "description" in entity:
+                    st.markdown(f'<span class="entity-tag">{entity["name"]}: {entity["description"]}</span>', unsafe_allow_html=True)
+                else:
+                    st.markdown(f'<span class="entity-tag">{str(entity)}</span>', unsafe_allow_html=True)
+    elif isinstance(entities, str):
+        # If entities is a single string, split it into individual entities
+        entity_list = [e.strip() for e in entities.split('\n') if e.strip()]
+        for entity in entity_list:
+            if " - " in entity:
+                parts = entity.split(" - ", 1)
+                if len(parts) == 2:
+                    name = parts[0].strip()
+                    description = parts[1].strip()
+                    st.markdown(f'<span class="entity-tag">{name}: {description}</span>', unsafe_allow_html=True)
+                else:
+                    st.markdown(f'<span class="entity-tag">{entity}</span>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<span class="entity-tag">{entity}</span>', unsafe_allow_html=True)
+    else:
+        st.info(f"Unexpected entities format: {type(entities)}")
+
 def display_relationships(relationships):
     """Display relationships with improved formatting"""
     if not relationships:
@@ -189,39 +265,33 @@ def display_relationships(relationships):
                     entity2 = rel.get("entity2", "")
                     relationship_text = rel.get("relationship", "")
                     
-                    # Create a title for the relationship
-                    if entity1 and entity2:
-                        title = f"{entity1} ↔ {entity2}"
-                    elif entity1:
-                        title = entity1
-                    elif entity2:
-                        title = entity2
-                    else:
-                        # Extract a title from the relationship text if no entities are available
-                        if ":" in relationship_text:
-                            title = relationship_text.split(":", 1)[0].strip()
-                        else:
-                            title = "Relationship"
-                    
                     st.markdown(f'''
                     <div class="relationship-card">
-                        <strong>{title}</strong><br>
-                        {relationship_text}
+                        <div class="relationship-header">
+                            <span class="relationship-source">{entity1}</span>
+                            <span class="relationship-arrow">→</span>
+                            <span class="relationship-target">{entity2}</span>
+                        </div>
+                        <div class="relationship-description">{relationship_text}</div>
                     </div>
                     ''', unsafe_allow_html=True)
                 # Handle other dictionary formats
                 elif "entity" in rel and "description" in rel:
                     st.markdown(f'''
                     <div class="relationship-card">
-                        <strong>{rel["entity"]}</strong><br>
-                        {rel["description"]}
+                        <div class="relationship-header">
+                            <span class="relationship-source">{rel["entity"]}</span>
+                        </div>
+                        <div class="relationship-description">{rel["description"]}</div>
                     </div>
                     ''', unsafe_allow_html=True)
                 elif "name" in rel and "description" in rel:
                     st.markdown(f'''
                     <div class="relationship-card">
-                        <strong>{rel["name"]}</strong><br>
-                        {rel["description"]}
+                        <div class="relationship-header">
+                            <span class="relationship-source">{rel["name"]}</span>
+                        </div>
+                        <div class="relationship-description">{rel["description"]}</div>
                     </div>
                     ''', unsafe_allow_html=True)
                 else:
@@ -238,8 +308,10 @@ def display_relationships(relationships):
                     if len(parts) == 2:
                         st.markdown(f'''
                         <div class="relationship-card">
-                            <strong>{parts[0].strip()}</strong><br>
-                            {parts[1].strip()}
+                            <div class="relationship-header">
+                                <span class="relationship-source">{parts[0].strip()}</span>
+                            </div>
+                            <div class="relationship-description">{parts[1].strip()}</div>
                         </div>
                         ''', unsafe_allow_html=True)
                     else:
@@ -267,8 +339,10 @@ def display_relationships(relationships):
             if len(parts) == 2:
                 st.markdown(f'''
                 <div class="relationship-card">
-                    <strong>{parts[0].strip()}</strong><br>
-                    {parts[1].strip()}
+                    <div class="relationship-header">
+                        <span class="relationship-source">{parts[0].strip()}</span>
+                    </div>
+                    <div class="relationship-description">{parts[1].strip()}</div>
                 </div>
                 ''', unsafe_allow_html=True)
             else:
@@ -316,11 +390,14 @@ def display_controversy_score(controversy_data):
     score = controversy_data.get("value", 0)
     explanation = controversy_data.get("explanation", "")
     
+    # Cap the score at 1.0 for display purposes
+    display_score = min(score, 1.0)
+    
     # Determine color based on score
-    if score < 0.3:
+    if display_score < 0.3:
         color = "#2ca02c"  # Green
         label = "Low Controversy"
-    elif score < 0.7:
+    elif display_score < 0.7:
         color = "#ff7f0e"  # Orange
         label = "Medium Controversy"
     else:
@@ -330,18 +407,105 @@ def display_controversy_score(controversy_data):
     # Display the score as a progress bar
     st.markdown(f'''
     <div class="controversy-meter">
-        <div class="controversy-fill" style="width: {score*100}%; background: {color};"></div>
+        <div class="controversy-fill" style="width: {display_score*100}%; background: {color};"></div>
     </div>
     ''', unsafe_allow_html=True)
     
     # Display score and explanation
     col1, col2 = st.columns([1, 3])
     with col1:
-        st.markdown(f"**Score:** {score:.1f}/1.0")
+        # Show the actual score, not the capped one
+        st.markdown(f"**Score:** {score}/1.0")
         st.markdown(f"**Level:** {label}")
+        
+        # Add a warning if the score is above 1.0
+        if score > 1.0:
+            st.warning(f"Score {score} is above the maximum expected value of 1.0")
     
     with col2:
         st.markdown(f"**Explanation:** {explanation}")
+
+def scrape_twitter_data(query, start_date=None, end_date=None):
+    """Function to scrape Twitter data and save to JSON"""
+    try:
+        # Ensure output directory exists
+        os.makedirs("outputs", exist_ok=True)
+        
+        # Initialize Twitter scraper
+        scraper = TwitterScraper(
+            search_query=query,
+            start_date=start_date,
+            end_date=end_date,
+            json_output=f"twitter_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            output_dir="outputs"
+        )
+        
+        # Run the scraping pipeline
+        scraper.run_pipeline()
+        
+        # The file will be saved in outputs directory with the generated filename
+        output_file = os.path.join("outputs", scraper.json_output)
+        if os.path.exists(output_file):
+            return output_file, None
+        else:
+            return None, "Twitter scraping completed but output file not found."
+    except Exception as e:
+        return None, f"Error during Twitter scraping: {str(e)}"
+
+def scrape_reddit_data(query):
+    """Function to scrape Reddit data and save to JSON"""
+    try:
+        scraper = RedditScraper()
+        if not scraper.reddit:
+            return None, "Failed to initialize Reddit scraper. Please check credentials."
+        
+        # Get the refined query using Gemini
+        final_query = query     
+        
+        # Fetch Reddit data
+        scraped_data = scraper.search_and_fetch(final_query, limit=10)  # do not need the large data
+        
+        if not scraped_data:
+            return None, "No data found for the given query."
+            
+        # Generate unique filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_filename = f"reddit_search_{timestamp}.json"
+        
+        # Save to JSON file
+        with open(output_filename, "w", encoding="utf-8") as f:
+            json.dump(scraped_data, f, indent=4, ensure_ascii=False)
+            
+        return output_filename, None
+    except Exception as e:
+        return None, f"Error during Reddit scraping: {str(e)}"
+
+def scrape_youtube_data(query, max_results=10):
+    """Function to scrape YouTube data and save to JSON"""
+    try:
+        # Ensure output directory exists
+        os.makedirs("outputs", exist_ok=True)
+        
+        # Initialize YouTube scraper
+        scraper = YouTubeScraper()
+        
+        # Run the scraping pipeline
+        videos = scraper.fetch_youtube_videos(query, max_results=max_results)
+        
+        if not videos:
+            return None, "No videos found for the given query."
+        
+        # Generate unique filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_filename = f"youtube_search_{timestamp}.json"
+        
+        # Save to JSON file
+        with open(output_filename, "w", encoding="utf-8") as f:
+            json.dump(videos, f, indent=4, ensure_ascii=False)
+            
+        return output_filename, None
+    except Exception as e:
+        return None, f"Error during YouTube scraping: {str(e)}"
 
 def main():
     # Initialize session state
@@ -350,18 +514,168 @@ def main():
     
     # Header
     st.markdown('<h1 class="main-header">📊 Text Analysis Dashboard</h1>', unsafe_allow_html=True)
-    st.markdown("---")
     
-    # Sidebar
+    # Add tabs for different functionalities
+    tab1, tab2, tab3 = st.tabs(["Social Media Analysis", "Custom File Analysis", "Settings"])
+    
+    with tab1:
+        st.markdown("### 🔍 Social Media Search and Analysis")
+        
+        # Social media platform selection
+        platform = st.radio(
+            "Choose your platform:",
+            ["Reddit", "Twitter", "YouTube"],
+            horizontal=True,
+            help="Select which social media platform to search"
+        )
+        
+        # Search input
+        search_query = st.text_input(
+            f"Enter your search query for {platform}:", 
+            help=f"Enter what you want to search for on {platform}"
+        )
+        
+        # Date range for Twitter and YouTube
+        if platform in ["Twitter", "YouTube"]:
+            col1, col2 = st.columns(2)
+            with col1:
+                start_date = st.date_input("Start Date (optional)", None)
+            with col2:
+                end_date = st.slider("Number of results", min_value=1, max_value=20, value=10)
+        
+        if st.button(f"Search {platform} & Analyze"):
+            if search_query:
+                with st.spinner(f"Fetching data from {platform}..."):
+                    if platform == "Reddit":
+                        filename, error = scrape_reddit_data(search_query)
+                    elif platform == "Twitter":
+                        start_date_str = start_date.strftime("%Y-%m-%d") if start_date else None
+                        end_date_str = end_date.strftime("%Y-%m-%d") if end_date else None
+                        filename, error = scrape_twitter_data(search_query, start_date_str, end_date_str)
+                    else:  # YouTube
+                        max_results = st.session_state.get('youtube_max_results', 10)
+                        filename, error = scrape_youtube_data(search_query, max_results=max_results)
+                    
+                    if error:
+                        st.error(error)
+                    else:
+                        st.session_state.youtube_file = filename
+                        st.success(f"YouTube data saved to {filename}")
+                        
+                        # Proceed with analysis
+                        with st.spinner("Analyzing the data..."):
+                            raw_output = combine_analysis(filename)
+                            if raw_output:
+                                parsed_data = parse_simple_format(raw_output)
+                                st.session_state.analysis_data = parsed_data
+                                st.session_state.analysis_complete = True
+                                st.success("Analysis complete! View results below.")
+                            else:
+                                st.error("Analysis failed to produce output.")
+            else:
+                st.warning("Please enter a search query.")
+        
+        # Display analysis results if available
+        if st.session_state.get('analysis_complete'):
+            st.markdown("---")
+            st.markdown("### 📊 Analysis Results")
+            
+            analysis_data = st.session_state.analysis_data.get("multiverse_combined", {})
+            
+            # Executive Summary
+            st.markdown('<h2 class="section-header">📝 Executive Summary</h2>', unsafe_allow_html=True)
+            exec_summary = analysis_data.get('executive_summary', 'No summary available')
+            
+            # Check if the summary contains bullet points
+            if "- " in exec_summary:
+                # Split by bullet points and create a formatted list
+                points = [point.strip() for point in exec_summary.split('- ') if point.strip()]
+                st.write("**Key Points:**")
+                for point in points:
+                    st.markdown(f"• {point}")
+            else:
+                st.markdown(f"**{exec_summary}**")
+            
+            # Sentiment Analysis
+            st.markdown('<h2 class="section-header">😊 Sentiment Analysis</h2>', unsafe_allow_html=True)
+            display_sentiment_analysis(analysis_data.get("sentiment_analysis", {}))
+            
+            # Topics
+            st.markdown('<h2 class="section-header">🏷️ Key Topics</h2>', unsafe_allow_html=True)
+            
+            if "topics" in analysis_data:
+                topics = analysis_data["topics"]
+                for topic in topics:
+                    st.markdown(f'<span class="topic-tag">{topic}</span>', unsafe_allow_html=True)
+            else:
+                st.info("No topics identified")
+            
+            # Entity Recognition
+            st.markdown('<h2 class="section-header">👥 Recognized Entities</h2>', unsafe_allow_html=True)
+            display_entities(analysis_data.get("entity_recognition", []))
+            
+            # Relationships
+            st.markdown('<h2 class="section-header">🔗 Relationships</h2>', unsafe_allow_html=True)
+            display_relationships(analysis_data.get("relationship_extraction", []))
+            
+            # Anomalies
+            st.markdown('<h2 class="section-header">⚠️ Detected Anomalies</h2>', unsafe_allow_html=True)
+            display_anomalies(analysis_data.get("anomaly_detection", []))
+            
+            # Controversy Score
+            st.markdown('<h2 class="section-header">🌡️ Controversy Score</h2>', unsafe_allow_html=True)
+            display_controversy_score(analysis_data.get("controversy_score", {}))
+    
+    # Sidebar for global settings
     st.sidebar.title("Analysis Settings")
     
-    # File uploader
-    uploaded_file = st.sidebar.file_uploader(
-        "Upload a JSON file for analysis",
-        type=["json"],
-        help="Upload a JSON file containing text data to be analyzed"
-    )
-    print(uploaded_file)
+    with tab2:
+        st.markdown("### 📂 Custom File Analysis")
+        # File uploader in the main area for custom analysis
+        uploaded_file = st.file_uploader(
+            "Upload a JSON file for analysis",
+            type=["json"],
+            help="Upload a JSON file containing text data to be analyzed"
+        )
+    
+    # Settings tab
+    with tab3:
+        st.markdown("### ⚙️ Settings")
+        
+        # Twitter settings section
+        st.subheader("Twitter Settings")
+        cookies_status = "✅ Found" if os.path.exists("twitter_cookies.json") else "❌ Not Found"
+        st.info(f"Twitter Cookies Status: {cookies_status}")
+        
+        uploaded_cookies = st.file_uploader(
+            "Upload Twitter Cookies File (twitter_cookies.json)",
+            type=["json"],
+            help="Upload your Twitter cookies file for authentication"
+        )
+        
+        if uploaded_cookies:
+            with open("twitter_cookies.json", "wb") as f:
+                f.write(uploaded_cookies.getvalue())
+            st.success("Twitter cookies file updated successfully!")
+        
+        # YouTube settings section
+        st.subheader("YouTube Settings")
+        st.slider("Default number of results", min_value=1, max_value=20, value=10, key="youtube_max_results")
+        
+        cookies_status = "✅ Found" if os.path.exists("youtube_cookies.json") else "❌ Not Found"
+        st.info(f"YouTube Cookies Status: {cookies_status}")
+        
+        uploaded_cookies = st.file_uploader(
+            "Upload YouTube Cookies File (youtube_cookies.json)",
+            type=["json"],
+            help="Upload your YouTube cookies file for authentication"
+        )
+        
+        if uploaded_cookies:
+            with open("youtube_cookies.json", "wb") as f:
+                f.write(uploaded_cookies.getvalue())
+            st.success("YouTube cookies file updated successfully!")
+    
     # Analysis options
     st.sidebar.subheader("Analysis Options")
     show_raw_output = st.sidebar.checkbox("Show Raw Output", value=False)
@@ -374,7 +688,7 @@ def main():
         st.sidebar.success("Cache cleared! Please upload your file again.")
         st.rerun()
     
-    # Main content
+    # Main content for custom file analysis
     if uploaded_file is not None:
         # Display file info
         st.sidebar.subheader("File Information")
@@ -388,29 +702,33 @@ def main():
         
         try:
             # Clear cache before analysis if requested
-            if st.sidebar.button("Clear Cache & Analyze"):
+            if st.button("Clear Cache & Analyze"):
                 clear_cache()
-                st.sidebar.success("Cache cleared! Starting fresh analysis...")
+                st.success("Cache cleared! Starting fresh analysis...")
             
             # Run analysis
             with st.spinner("Analyzing your data... This may take a few minutes."):
-                # Call the analysis function
-                raw_output = combine_analysis(tmp_file_path)
+                try:
+                    # Call the analysis function
+                    raw_output = combine_analysis(tmp_file_path)
+                    
+                    # Check if the analysis was successful
+                    if not raw_output or raw_output.strip() == "":
+                        st.error("Analysis failed to produce output. Please try clearing the cache and running the analysis again.")
+                        return
+                    
+                    # Parse the output
+                    parsed_data = parse_simple_format(raw_output)
+                    
+                    # Save results if requested
+                    if save_results:
+                        with open("analysis_results.json", "w", encoding="utf-8") as f:
+                            json.dump(parsed_data, f, indent=4, ensure_ascii=False)
+                        st.sidebar.success("Results saved to analysis_results.json")
+                except:
+                    pass 
                 
-                # Check if the analysis was successful
-                if not raw_output or raw_output.strip() == "":
-                    st.error("Analysis failed to produce output. Please try clearing the cache and running the analysis again.")
-                    return
                 
-                # Parse the output
-                parsed_data = parse_simple_format(raw_output)
-                
-                # Save results if requested
-                if save_results:
-                    with open("analysis_results.json", "w", encoding="utf-8") as f:
-                        json.dump(parsed_data, f, indent=4, ensure_ascii=False)
-                    st.sidebar.success("Results saved to analysis_results.json")
-            
             # Display results
             # Check for different possible structures in the parsed data
             analysis_data = None
@@ -452,16 +770,7 @@ def main():
                 
                 # Entity Recognition
                 st.markdown('<h2 class="section-header">👥 Recognized Entities</h2>', unsafe_allow_html=True)
-                
-                if "entity_recognition" in analysis_data:
-                    entities = analysis_data["entity_recognition"]
-                    if isinstance(entities, list):
-                        for entity in entities:
-                            st.markdown(f'<span class="entity-tag">{entity}</span>', unsafe_allow_html=True)
-                    else:
-                        st.markdown(f'<span class="entity-tag">{entities}</span>', unsafe_allow_html=True)
-                else:
-                    st.info("No entities identified")
+                display_entities(analysis_data.get("entity_recognition", []))
                 
                 # Relationship Extraction
                 st.markdown('<h2 class="section-header">🔗 Relationships</h2>', unsafe_allow_html=True)
@@ -497,6 +806,7 @@ def main():
         
         This tool analyzes text data from JSON files and provides insights including:
         - Executive summaries
+        - Social media search and analysis
         - Sentiment analysis
         - Key topics
         - Entity recognition
@@ -505,13 +815,16 @@ def main():
         - Controversy scoring
         
         ### How to use:
-        1. Upload a JSON file using the sidebar on the left
-        2. Configure your analysis options
-        3. Click "Clear Cache & Analyze" to start a fresh analysis
-        4. View the results below
+        1. Choose a social media platform from the dropdown
+        2. Enter your search query
+        3. Configure date range (for Twitter/YouTube) or number of results (for YouTube)
+        4. Click "Search & Analyze" to start the analysis
+        5. View the results below
         
-        ### Supported JSON format:
-        Your JSON file should contain text data that can be analyzed. The system will extract all text content from the JSON structure.
+        ### Supported platforms:
+        - Reddit: Search Reddit posts and comments
+        - Twitter: Search tweets with date range filtering
+        - YouTube: Search videos with customizable number of results
         
         ### Troubleshooting:
         If you encounter issues with the analysis, try clicking "Clear Cache & Restart Analysis" before uploading your file again.
