@@ -15,6 +15,9 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 from config import PHI4_MAX_CONTEXT, SAFETY_MARGIN, MIN_TOKENS_RESERVE
 
+def get_timestamp():
+    """Get current timestamp for logging"""
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 def validate_batches(batches, max_tokens_per_batch):
     """
@@ -27,13 +30,13 @@ def validate_batches(batches, max_tokens_per_batch):
         batch_tokens = sum(estimate_tokens(chunk) for chunk in batch)
         
         if batch_tokens > max_tokens_per_batch:
-            logging.warning(f"Batch {i} is too large ({batch_tokens} tokens > {max_tokens_per_batch}).")
+            logging.warning(f"[{get_timestamp()}] Batch {i} is too large ({batch_tokens} tokens > {max_tokens_per_batch}).")
             oversized_batches.append((i, batch, batch_tokens))
         else:
             valid_batches.append(batch)
     
     if oversized_batches:
-        logging.warning(f"Found {len(oversized_batches)} oversized batches that need reprocessing.")
+        logging.warning(f"[{get_timestamp()}] Found {len(oversized_batches)} oversized batches that need reprocessing.")
     
     return valid_batches, oversized_batches
 
@@ -49,7 +52,7 @@ def validate_and_reprocess_chunks(chunks, max_tokens):
         
         if chunk_tokens > max_tokens:
             oversized_count += 1
-            logging.warning(f"Chunk {i} is too large ({chunk_tokens} tokens > {max_tokens}). Splitting it.")
+            logging.warning(f"[{get_timestamp()}] Chunk {i} is too large ({chunk_tokens} tokens > {max_tokens}). Splitting it.")
             
             # Split the oversized chunk
             words = chunk.split()
@@ -74,7 +77,7 @@ def validate_and_reprocess_chunks(chunks, max_tokens):
             valid_chunks.append(chunk)
     
     if oversized_count > 0:
-        logging.info(f"Reprocessed {oversized_count} oversized chunks. Total chunks now: {len(valid_chunks)}")
+        logging.info(f"[{get_timestamp()}] Reprocessed {oversized_count} oversized chunks. Total chunks now: {len(valid_chunks)}")
     
     return valid_chunks
 
@@ -92,7 +95,7 @@ def load_json(path):
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
-        logging.error(f"Failed to load JSON from {path}: {e}")
+        logging.error(f"[{get_timestamp()}] Failed to load JSON from {path}: {e}")
         raise
 
 def estimate_tokens(text):
@@ -118,7 +121,7 @@ def _truncate_text_to_token_limit(text: str, max_tokens: int) -> str:
     return truncated
 
 
-def extract_texts(data, max_tokens_from_file: int = 20000):
+def extract_texts(data, max_tokens_from_file: int = 200000):
     """
     Extracts all text content from various JSON structures and returns only the
     first `max_tokens_from_file` tokens (default 20k) worth of text as a single
@@ -146,10 +149,10 @@ def extract_texts(data, max_tokens_from_file: int = 20000):
 
     total_tokens = estimate_tokens(consolidated)
     if total_tokens <= max_tokens_from_file:
-        logging.info(f"extract_texts: extracted {total_tokens:,} tokens (<= {max_tokens_from_file:,}), using full text.")
+        logging.info(f"[{get_timestamp()}] extract_texts: extracted {total_tokens:,} tokens (<= {max_tokens_from_file:,}), using full text.")
         return [consolidated]
 
-    logging.info(f"extract_texts: extracted {total_tokens:,} tokens (> {max_tokens_from_file:,}); truncating to {max_tokens_from_file:,} tokens.")
+    logging.info(f"[{get_timestamp()}] extract_texts: extracted {total_tokens:,} tokens (> {max_tokens_from_file:,}); truncating to {max_tokens_from_file:,} tokens.")
     truncated = _truncate_text_to_token_limit(consolidated, max_tokens_from_file)
 
     # try to cut at the last natural break near the end
@@ -158,7 +161,7 @@ def extract_texts(data, max_tokens_from_file: int = 20000):
         truncated = truncated[:last_break+1]
 
     final_tokens = estimate_tokens(truncated)
-    logging.info(f"extract_texts: truncated text is {final_tokens:,} tokens.")
+    logging.info(f"[{get_timestamp()}] extract_texts: truncated text is {final_tokens:,} tokens.")
     return [truncated]
 
 
@@ -214,17 +217,17 @@ def chunk_texts(texts, size, overlap):
             else:
                 chunks.append(chunk)
     
-    logging.info(f"Successfully created {len(chunks)} chunks from the consolidated data.")
+    logging.info(f"[{get_timestamp()}] Successfully created {len(chunks)} chunks from the consolidated data.")
     
     # Log and verify the size distribution of chunks
     chunk_sizes = [estimate_tokens(chunk) for chunk in chunks]
     avg_size = sum(chunk_sizes) / len(chunk_sizes) if chunk_sizes else 0
     max_size = max(chunk_sizes) if chunk_sizes else 0
-    logging.info(f"Chunk token distribution: avg={avg_size:.0f}, max={max_size}")
+    logging.info(f"[{get_timestamp()}] Chunk token distribution: avg={avg_size:.0f}, max={max_size}")
     
     # Final safety check - split any remaining large chunks
     if max_size > max_safe_tokens:
-        logging.warning(f"Found chunks above safe token limit. Performing final split...")
+        logging.warning(f"[{get_timestamp()}] Found chunks above safe token limit. Performing final split...")
         safe_chunks = []
         for chunk in chunks:
             chunk_tokens = estimate_tokens(chunk)
@@ -242,7 +245,7 @@ def chunk_texts(texts, size, overlap):
         chunk_sizes = [estimate_tokens(chunk) for chunk in chunks]
         avg_size = sum(chunk_sizes) / len(chunk_sizes) if chunk_sizes else 0
         max_size = max(chunk_sizes) if chunk_sizes else 0
-        logging.info(f"After final split - chunks: {len(chunks)}, avg tokens: {avg_size:.0f}, max tokens: {max_size}")
+        logging.info(f"[{get_timestamp()}] After final split - chunks: {len(chunks)}, avg tokens: {avg_size:.0f}, max tokens: {max_size}")
     
     return chunks
 
@@ -264,10 +267,10 @@ def create_processing_batches(chunks, max_tokens_per_batch):
     
     # Additional validation
     if safe_token_limit <= 0:
-        logging.error(f"Token limit too small: {max_tokens_per_batch}. Need at least 6500 tokens.")
+        logging.error(f"[{get_timestamp()}] Token limit too small: {max_tokens_per_batch}. Need at least 6500 tokens.")
         safe_token_limit = 8000  # Fallback to reasonable minimum
     
-    logging.info(f"Starting batch creation with conservative limits (max {safe_token_limit} tokens per batch)...")
+    logging.info(f"[{get_timestamp()}] Starting batch creation with conservative limits (max {safe_token_limit} tokens per batch)...")
     
     def split_text_on_boundaries(text, target_tokens):
         """Helper to split text on semantic boundaries with enhanced safety."""
@@ -320,7 +323,7 @@ def create_processing_batches(chunks, max_tokens_per_batch):
         
         # If a single chunk is too large
         if chunk_tokens > safe_token_limit:
-            logging.warning(f"Chunk {i} ({chunk_tokens} tokens) exceeds safe limit ({safe_token_limit}). Smart splitting...")
+            logging.warning(f"[{get_timestamp()}] Chunk {i} ({chunk_tokens} tokens) exceeds safe limit ({safe_token_limit}). Smart splitting...")
             
             # Save any current batch
             if current_batch:
@@ -365,7 +368,7 @@ def create_processing_batches(chunks, max_tokens_per_batch):
         batch_tokens = sum(estimate_tokens(chunk) for chunk in batch)
         if batch_tokens > safe_token_limit:
             # Split this batch if needed
-            logging.warning(f"Final check: Found batch with {batch_tokens} tokens. Splitting...")
+            logging.warning(f"[{get_timestamp()}] Final check: Found batch with {batch_tokens} tokens. Splitting...")
             text = " ".join(batch)
             sub_batches = split_text_on_boundaries(text, safe_token_limit)
             for sub_batch in sub_batches:
@@ -373,16 +376,16 @@ def create_processing_batches(chunks, max_tokens_per_batch):
         else:
             validated_batches.append(batch)
     
-    logging.info(f"Final batch count: {len(validated_batches)}")
+    logging.info(f"[{get_timestamp()}] Final batch count: {len(validated_batches)}")
     # Log token distribution
     batch_tokens = [sum(estimate_tokens(chunk) for chunk in batch) for batch in validated_batches]
     avg_tokens = sum(batch_tokens) / len(batch_tokens) if batch_tokens else 0
     max_tokens = max(batch_tokens) if batch_tokens else 0
-    logging.info(f"Batch token distribution: avg={avg_tokens:.0f}, max={max_tokens}")
+    logging.info(f"[{get_timestamp()}] Batch token distribution: avg={avg_tokens:.0f}, max={max_tokens}")
     
     return validated_batches
     
-    logging.info(f"Total batches created: {len(batches)}")
+    logging.info(f"[{get_timestamp()}] Total batches created: {len(batches)}")
     return batches
 
 def detect_language_script(txt):
@@ -430,10 +433,10 @@ def translate_chunk(chunk, translator, max_length, retries):
                 translated_sub_chunks.append(translator(sub_chunk, max_length=max_length)[0]["translation_text"])
                 break  # Success, move to the next sub-chunk
             except Exception as e:
-                logging.warning(f"Translation failed on attempt {retry_count + 1}/{retries} for sub-chunk: {e}")
+                logging.warning(f"[{get_timestamp()}] Translation failed on attempt {retry_count + 1}/{retries} for sub-chunk: {e}")
                 time.sleep(1) # Wait before retrying
         else:
-            logging.error(f"Max retries reached. Using original sub-chunk without translation: {sub_chunk[:50]}...")
+            logging.error(f"[{get_timestamp()}] Max retries reached. Using original sub-chunk without translation: {sub_chunk[:50]}...")
             translated_sub_chunks.append(sub_chunk)
             
     return " ".join(translated_sub_chunks)
@@ -445,7 +448,7 @@ def translate(chunks, max_length, retries):
         model = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-mul-en")
         trans = pipeline("translation", model=model, tokenizer=tok)
     except Exception as e:
-        logging.error(f"Failed to load translation model: {e}")
+        logging.error(f"[{get_timestamp()}] Failed to load translation model: {e}")
         return chunks
     out = []
     for c in tqdm(chunks, desc="Translating"):
@@ -471,7 +474,7 @@ def parallel_map(func, inputs, max_workers=4):
             try:
                 results[original_idx] = future.result()
             except Exception as e:
-                logging.error(f"Parallel task for input at index {original_idx} failed: {e}")
+                logging.error(f"[{get_timestamp()}] Parallel task for input at index {original_idx} failed: {e}")
                 results[original_idx] = None
     
     return results
@@ -502,19 +505,55 @@ def check_memory_requirements(required_mb, buffer_mb=1000):
         return False, f"Insufficient memory: {available:.2f}MB available, {total_needed}MB needed"
 
 
-def process_json_to_batches(input_json_path, output_json_path, max_tokens_per_batch=11000):
+#!/usr/bin/env python3
+"""
+Module for processing JSON data into batches with strict token limits.
+"""
+
+import json
+import logging
+import tiktoken
+from datetime import datetime
+from config import JSON_PATH, BATCH_SIZE_TOKENS, CHUNK_SIZE, CHUNK_OVERLAP
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("analysis_log.txt"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+def get_timestamp():
+    """Get current timestamp as string."""
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def _iso_now():
+    """Get current timestamp in ISO format."""
+    return datetime.now().isoformat()
+
+def estimate_tokens(text):
+    """Estimate token count for a text."""
+    # Using a generic tokenizer for token estimation
+    tokenizer = tiktoken.get_encoding("cl100k_base")
+    return len(tokenizer.encode(text))
+
+
+
+
+
+def process_json_to_batches(input_json_path, output_json_path, max_tokens_per_batch=16700):
     """
-    Process a JSON input file into batches with token limits and save to a new JSON file.
-    Each batch will contain content and its token count.
+    Process a JSON input file into batches with strict token limits and save to a new JSON file.
+    Each batch will contain content and its token count, strictly under the token limit.
     
     Args:
         input_json_path (str): Path to input JSON file
         output_json_path (str): Path to save batches JSON file
-        max_tokens_per_batch (int): Maximum tokens per batch (default 11000)
-                                  Note: Using conservative limit to account for:
-                                  - Prompt overhead (~500 tokens)
-                                  - Response overhead (~3000 tokens)
-                                  - Safety margin (~1500 tokens)
+        max_tokens_per_batch (int): Maximum tokens per batch (default 16700)
     """
     try:
         # Load input JSON
@@ -526,9 +565,9 @@ def process_json_to_batches(input_json_path, output_json_path, max_tokens_per_ba
         if not texts:
             raise ValueError("No text content found in input JSON")
             
-        # Create chunks
-        chunks = chunk_texts(texts, max_tokens_per_batch * 4, overlap=50)  # *4 for char estimation
-        logging.info(f"Created {len(chunks)} initial chunks")
+        # Create chunks with character estimation (4 chars per token is a rough estimate)
+        chunks = chunk_texts(texts, max_tokens_per_batch * 4, overlap=50)
+        logger.info(f"[{get_timestamp()}] Created {len(chunks)} initial chunks")
         
         # Initialize batches list
         batches_data = {
@@ -540,13 +579,64 @@ def process_json_to_batches(input_json_path, output_json_path, max_tokens_per_ba
             "batches": []
         }
         
-        # Process chunks into batches
+        # Process chunks into batches with strict token limits
         current_batch = []
         current_tokens = 0
         batch_number = 1
         
         for chunk in chunks:
             chunk_tokens = estimate_tokens(chunk)
+            
+            # If this single chunk exceeds the limit, split it further
+            if chunk_tokens > max_tokens_per_batch:
+                # Save current batch if it has content
+                if current_batch:
+                    batch_entry = {
+                        "batch_no": batch_number,
+                        "content": "\n\n".join(current_batch),
+                        "token_count": current_tokens
+                    }
+                    batches_data["batches"].append(batch_entry)
+                    batch_number += 1
+                    current_batch = []
+                    current_tokens = 0
+                
+                # Split the large chunk into smaller pieces
+                # We'll split by characters to ensure we don't exceed the token limit
+                chars_per_token = len(chunk) / chunk_tokens
+                max_chars = int(max_tokens_per_batch * chars_per_token * 0.9)  # 90% to be safe
+                
+                sub_chunks = []
+                start = 0
+                while start < len(chunk):
+                    end = start + max_chars
+                    if end >= len(chunk):
+                        sub_chunks.append(chunk[start:])
+                        break
+                    
+                    # Try to find a good breaking point
+                    break_pos = chunk.rfind('\n\n', start, end)
+                    if break_pos == -1:
+                        break_pos = chunk.rfind('\n', start, end)
+                    if break_pos == -1:
+                        break_pos = chunk.rfind('. ', start, end)
+                    if break_pos == -1:
+                        break_pos = end
+                    
+                    sub_chunks.append(chunk[start:break_pos])
+                    start = break_pos
+                
+                # Add each sub-chunk as its own batch
+                for sub_chunk in sub_chunks:
+                    sub_tokens = estimate_tokens(sub_chunk)
+                    batch_entry = {
+                        "batch_no": batch_number,
+                        "content": sub_chunk,
+                        "token_count": sub_tokens
+                    }
+                    batches_data["batches"].append(batch_entry)
+                    batch_number += 1
+                continue
             
             # If adding this chunk would exceed limit, save current batch and start new one
             if current_tokens + chunk_tokens > max_tokens_per_batch:
@@ -574,12 +664,17 @@ def process_json_to_batches(input_json_path, output_json_path, max_tokens_per_ba
             }
             batches_data["batches"].append(batch_entry)
         
+        # Verify all batches are under the token limit
+        for batch in batches_data["batches"]:
+            if batch["token_count"] > max_tokens_per_batch:
+                logger.warning(f"Batch {batch['batch_no']} exceeds token limit: {batch['token_count']} > {max_tokens_per_batch}")
+        
         # Save batches to output JSON file
         with open(output_json_path, 'w', encoding='utf-8') as f:
             json.dump(batches_data, f, indent=2, ensure_ascii=False)
             
-        logging.info(f"Successfully created {len(batches_data['batches'])} batches")
-        logging.info(f"Saved batches to {output_json_path}")
+        logger.info(f"[{get_timestamp()}] Successfully created {len(batches_data['batches'])} batches")
+        logger.info(f"[{get_timestamp()}] Saved batches to {output_json_path}")
         
         # Clean up chunks (they are no longer needed)
         chunks.clear()
@@ -587,7 +682,7 @@ def process_json_to_batches(input_json_path, output_json_path, max_tokens_per_ba
         return len(batches_data["batches"])
         
     except Exception as e:
-        logging.error(f"Error processing JSON to batches: {e}")
+        logger.error(f"[{get_timestamp()}] Error processing JSON to batches: {e}")
         raise
 
 
@@ -622,7 +717,7 @@ def process_multiple_json_files(input_json_paths, output_json_path, max_tokens_p
         
         # Process each input file
         for file_path in tqdm(input_json_paths, desc="Processing JSON files"):
-            logging.info(f"Processing file: {file_path}")
+            logging.info(f"[{get_timestamp()}] Processing file: {file_path}")
             
             try:
                 # Load and extract text from each file
@@ -633,17 +728,17 @@ def process_multiple_json_files(input_json_paths, output_json_path, max_tokens_p
                 if texts:
                     # Create chunks for this file
                     file_chunks = chunk_texts(texts, max_tokens_per_batch * 4, overlap=50)
-                    logging.info(f"Created {len(file_chunks)} chunks from {file_path}")
+                    logging.info(f"[{get_timestamp()}] Created {len(file_chunks)} chunks from {file_path}")
                     total_chunks.extend(file_chunks)
                 else:
-                    logging.warning(f"No text content found in {file_path}")
+                    logging.warning(f"[{get_timestamp()}] No text content found in {file_path}")
                     
             except Exception as e:
-                logging.error(f"Error processing {file_path}: {e}")
+                logging.error(f"[{get_timestamp()}] Error processing {file_path}: {e}")
                 continue
         
         # Process all chunks into batches
-        logging.info(f"Processing {len(total_chunks)} total chunks into batches")
+        logging.info(f"[{get_timestamp()}] Processing {len(total_chunks)} total chunks into batches")
         
         current_batch = []
         current_tokens = 0
@@ -689,8 +784,8 @@ def process_multiple_json_files(input_json_paths, output_json_path, max_tokens_p
         with open(output_json_path, 'w', encoding='utf-8') as f:
             json.dump(batches_data, f, indent=2, ensure_ascii=False)
             
-        logging.info(f"Successfully created {len(batches_data['batches'])} total batches")
-        logging.info(f"Saved combined batches to {output_json_path}")
+        logging.info(f"[{get_timestamp()}] Successfully created {len(batches_data['batches'])} total batches")
+        logging.info(f"[{get_timestamp()}] Saved combined batches to {output_json_path}")
         
         # Clean up
         total_chunks.clear()
@@ -698,7 +793,7 @@ def process_multiple_json_files(input_json_paths, output_json_path, max_tokens_p
         return len(batches_data["batches"])
         
     except Exception as e:
-        logging.error(f"Error processing multiple JSON files: {e}")
+        logging.error(f"[{get_timestamp()}] Error processing multiple JSON files: {e}")
         raise
 
 
