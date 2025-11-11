@@ -1,3 +1,5 @@
+# main.py
+
 #!/usr/bin/env python3
 """
 Main orchestration file for the analysis pipeline.
@@ -11,7 +13,7 @@ import json
 import os
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from final_analysis import combined_analysis
+
 # Import configuration and modules
 from config import (
     JSON_PATH, GGUF_PATH, PHI4_MAX_CONTEXT, NUM_MODELS, MAX_WORKERS
@@ -22,7 +24,7 @@ from utils import (
 )
 from model_manager import SingleModelManager
 from analysis import process_batch
-
+from final_analysis import combined_analysis
 print(GGUF_PATH)
 print(JSON_PATH)
 
@@ -38,6 +40,11 @@ logging.basicConfig(
 
 PARTIAL_RESULTS_JSON = "partial_results_main.json"
 FAILED_BATCHES_JSON = "failed_batches_main.json"
+
+def save_results_to_file(results_list, filename):
+    """Save a list of results to a JSON file"""
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(results_list, f, indent=2)
 
 def main(json_path: str = JSON_PATH):
     """
@@ -76,7 +83,7 @@ def main(json_path: str = JSON_PATH):
                 num_batches = process_json_to_batches(
                     json_path,
                     temp_batches_file,
-                    max_tokens_per_batch=PHI4_MAX_CONTEXT - 3000  # Reserve space for prompt
+                    max_tokens_per_batch=PHI4_MAX_CONTEXT - 500  # Reserve space for prompt
                 )
                 logging.info(f"Successfully created {num_batches} batches")
                 
@@ -96,13 +103,7 @@ def main(json_path: str = JSON_PATH):
             except Exception as e:
                 logging.error(f"Error processing input JSON into batches: {e}")
                 raise
-            finally:
-                # Clean up temporary files
-                if os.path.exists(temp_batches_file):
-                    try:
-                        os.remove(temp_batches_file)
-                    except Exception as e:
-                        logging.warning(f"Could not remove temporary file {temp_batches_file}: {e}")
+            
             
             # Step 3: Initialize Model Managers
             model_managers = []
@@ -205,8 +206,8 @@ def main(json_path: str = JSON_PATH):
         successful_batches = len(final_results_list)
         
         if successful_batches == 0:
-            logging.error("No successful batches available for final combined analysis.")
-            return "ERROR: No successful batch analyses to generate final report."
+             logging.error("No successful batches available for final combined analysis.")
+             return "ERROR: No successful batch analyses to generate final report."
         
         if successful_batches < total_batches * 0.3:
             logging.error(f"Too many batches failed: {successful_batches}/{total_batches} successful.")
@@ -218,11 +219,19 @@ def main(json_path: str = JSON_PATH):
 
         logging.info("Generating the final report...")
         
-        # Pass the SAFE, filtered LIST OF STRINGS to combined_analysis
-        raw_analysis_output =combined_analysis(
-            PARTIAL_RESULTS_JSON
-            
-        )
+        # Save the final results list to a temporary file
+        temp_results_file = "temp_final_results.json"
+        save_results_to_file(final_results_list, temp_results_file)
+        
+        # Pass the file path to combined_analysis
+        raw_analysis_output = combined_analysis(temp_results_file)
+        
+        # Clean up the temporary file
+        if os.path.exists(temp_results_file):
+            try:
+                os.remove(temp_results_file)
+            except Exception as e:
+                logging.warning(f"Could not remove temporary file {temp_results_file}: {e}")
         
         logging.info("Final report generation complete.")
         return raw_analysis_output
