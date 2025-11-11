@@ -1,11 +1,19 @@
-# main2.py
+# main2.py (Simplified with sequential workflow)
 from main import main
-from main1 import run_v2_analysis  # Assuming this function exists for V2 analysis
+from final_analysis import combined_analysis
 import json
 import os 
 import re 
 import time
 from typing import Dict, Any
+from datetime import datetime
+import tempfile
+
+# Import PDF generation functionality
+from pdf_generator import pdf_generator
+
+# Import RAG Chatbot
+from rag_chatbot import create_rag_chatbot
 
 # Define the output file name
 OUTPUT_FILE = "final_output.txt"  # Changed to .txt since we're using simple format
@@ -72,13 +80,80 @@ def combine_analysis(json_path: str) -> str:
     # Return the original raw string output from main.py
     return a_json_string
 
+def generate_pdf_report():
+    """Generate PDF from the parsed data in final_output.txt"""
+    print("\n" + "="*50)
+    print("Generating PDF Report...")
+    print("="*50)
+    
+    # Use the global PDF generator instance
+    pdf_path = pdf_generator.generate_pdf_from_output_file(OUTPUT_FILE)
+    
+    if pdf_path:
+        print(f"\n📄 PDF report available at: {pdf_path}")
+        print(f"📁 You can find the report in the current directory.")
+        
+        # Ask if user wants to open the PDF
+        try:
+            import subprocess
+            import platform
+            
+            # Try to open the PDF with the default viewer
+            if platform.system() == "Darwin":  # macOS
+                subprocess.run(["open", pdf_path])
+            elif platform.system() == "Windows":  # Windows
+                os.startfile(pdf_path)
+            else:  # Linux
+                subprocess.run(["xdg-open", pdf_path])
+            
+            print(f"📂 Opening PDF report with default viewer...")
+        except Exception as e:
+            print(f"⚠️ Could not open PDF automatically: {str(e)}")
+            print(f"Please open the file manually: {pdf_path}")
+    else:
+        print("\n❌ Failed to generate PDF report")
+
+def start_rag_chatbot(json_path: str):
+    """Initialize and start the RAG chatbot with the original data."""
+    print("\n" + "="*50)
+    print("Starting RAG Chatbot - Query Extension")
+    print("="*50)
+    print("You can now ask questions about the original data.")
+    print("Type 'exit' to end the conversation.")
+    print("="*50 + "\n")
+    
+    try:
+        # Create and initialize the RAG chatbot
+        chatbot = create_rag_chatbot(json_path)
+        
+        # Start the interactive chat
+        chatbot.interactive_chat()
+        
+    except Exception as e:
+        print(f"❌ Error starting RAG chatbot: {str(e)}")
+        print("Please check the logs for more details.")
+
 # Example usage (uncomment and update path to run)
 if __name__ == "__main__":
-    path = "/home/anand/Documents/data/reddit_data23146574.json"
+    path = "/home/anand/final_app/data/youtube_search_output.json"
     print(path)
+    
+    # Step 1: Run the analysis
     combine_analysis(path)
     
-    # After the analysis is complete, parse and display the results
+    # Step 2: Parse and display the final output
     from simple_parser import parse_and_display
+    print("\n" + "="*50)
     print("Parsing and displaying final output...")
+    print("="*50)
     parse_and_display("final_output.txt")
+    
+    
+    
+    # Step 4: Start the RAG chatbot as an extension
+    print("\n" + "="*50)
+    print("Analysis Complete! Starting Chatbot Extension...")
+    print("="*50)
+    start_rag_chatbot(path)
+    # Step 3: Generate PDF report
+    generate_pdf_report()
