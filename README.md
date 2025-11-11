@@ -5,10 +5,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red.svg)](https://streamlit.io/)
-[![Last Commit](https://img.shields.io/github/last-commit/yourusername/multiverse-insights)](https://github.com/yourusername/multiverse-insights/commits/main)
-[![Issues](https://img.shields.io/github/issues/yourusername/multiverse-insights)](https://github.com/yourusername/multiverse-insights/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/Prathameshsci369/Multiverse-Insights)](https://github.com/Prathameshsci369/Multiverse-Insights/commits/main)
 
-![Multiverse Insights Logo](https://via.placeholder.com/300x100/1DA1F2/FFFFFF?text=Multiverse+Insights)
+<p align="center">
+  <img src="https://github.com/Prathameshsci369/Multiverse-Insights/blob/main/test_data/logo.jpg" alt="Multiverse Insights Logo" width="180" height="180" style="border-radius:50%;" />
+</p>
+
 
 **A next-generation multimodal social media analytics platform for real-time insights and AI-powered analysis.**
 
