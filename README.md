@@ -101,7 +101,7 @@ pip install -r requirements.txt
 
 ```bash
 # start streamlit UI
-streamlit run streamlit_app1.py
+streamlit run streamlit_app.py
 
 # then open http://localhost:8501
 ```
