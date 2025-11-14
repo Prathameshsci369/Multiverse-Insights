@@ -147,8 +147,8 @@ pip list
 mkdir -p models
 
 # Download Qwen model (example - change to actual model URL)
-wget -O models/Qwen2.5-7B-Instruct.Q5_K_M.gguf \
-  https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-GGUF/resolve/main/qwen2.5-7b-instruct-q5_k_m.gguf
+wget https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-Q5_K_M.gguf
+
 
 # Verify model download
 ls -la models/
