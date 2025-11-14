@@ -1,0 +1,44 @@
+streamlit>=1.28
+pandas>=1.3
+numpy>=1.21
+scikit-learn>=1.0
+scipy>=1.7
+matplotlib>=3.4
+seaborn>=0.11
+plotly>=5.0
+
+requests>=2.26
+beautifulsoup4>=4.11
+selenium>=4.1
+python-dotenv>=0.21
+
+transformers>=4.30
+sentence-transformers>=2.2.2
+huggingface-hub>=0.14
+tokenizers>=0.13
+sentencepiece>=0.1.98
+torch>=1.13   # For CPU/GPU — prefer installing the correct wheel from PyTorch if using CUDA
+accelerate>=0.20
+faiss-cpu>=1.7.3   # use faiss-gpu if you have CUDA and want GPU acceleration
+
+langchain>=0.1.0
+tqdm>=4.64
+
+tweepy>=4.14           # Twitter API (if using API)
+google-api-python-client>=2.80  # YouTube API
+pytube>=12.1           # YouTube downloads/parsing (optional)
+youtube-transcript-api>=0.6.0   # transcripts (optional)
+python-telegram-bot>=13.15      # Telegram scrapers (optional)
+
+pdfkit>=1.0.0          # PDF exports (or use reportlab)
+reportlab>=4.0         # PDF generation (alternate)
+
+uvicorn>=0.18.3        # if running any ASGI endpoints
+fastapi>=0.95.0        # optional, for APIs
+
+# Dev / testing
+pytest>=7.0
+pre-commit>=2.20
+black>=23.3.0
+flake8>=6.0
+mypy>=0.961
