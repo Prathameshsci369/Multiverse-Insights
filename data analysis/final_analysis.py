@@ -1,81 +1,89 @@
-from llama_cpp import Llama
-import os
-import time
-import json
-from typing import List, Dict, Any
 import logging
+import sys
+import gc
+import json
+import os
+from llama_cpp import Llama
+
 # --- Configuration ---
-# NOTE: Model Path is set to the provided GGUF file path.
+# NOTE: This model is loaded *separately* from the models in main.py
+# This is the "Final Analyst" model.
 MODEL_PATH = "/home/anand/Downloads/Qwen2.5-7B-Instruct.Q5_K_M.gguf"
+INPUT_TOKENS = 16384  # 16k
+OUTPUT_TOKENS = 4096  # 4k
+N_GPU_LAYERS = 0      # 0 for CPU-only, -1 to offload all layers to GPU
+# --- End Configuration ---
 
-# Setting this to 0 to force CPU-only execution.
-N_GPU_LAYERS = 0
-
-# Set a very large context size to handle extensive input text, as requested.
-# Qwen2.5-7B-Instruct has a context of 32768, so 25000 is safe.
-N_CTX = 25000
-
-# The chat template required for Qwen models.
-CHAT_FORMAT = "qwen" 
-
-# --- Constants ---
-# Path to the JSON file containing the text for analysis
-JSON_FILE_PATH = "partial_results_main.json"
-
-def load_and_join_text(file_path: str) -> str:
+def _load_model(model_path, n_ctx, n_gpu_layers):
     """
-    Loads text from the partial results JSON file by extracting content 
-    from the 'result' key of each batch and joining them into a single string.
+    (Internal) Loads the GGUF model from the specified path.
     """
-    logging.info(f"[INFO] Loading text content from: {file_path}")
-    if not os.path.exists(file_path):
-        logging.error(f"[ERROR] JSON input file not found at {file_path}. Returning empty text.")
-        return ""
-    
+    print("\n[Final Analysis] Loading final analysis model... This may take a moment.")
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        llm = Llama(
+            model_path=model_path,
+            n_ctx=n_ctx,
+            n_gpu_layers=n_gpu_layers,
+            verbose=False  # Disables verbose logging from llama_cpp
+        )
+        print(f"[Final Analysis] Model loaded successfully. Context: {INPUT_TOKENS}k, Max Output: {OUTPUT_TOKENS}k.")
+        return llm
     except Exception as e:
-        logging.error(f"[ERROR] Could not load or parse JSON file: {e}")
-        return ""
-        
-    all_text = []
-    
-    # Data is expected to be a dictionary, where each value is a batch object
-    if isinstance(data, dict):
-        # Iterate over the values (the batch objects) of the main dictionary
-        for batch_data in data.values():
-            if isinstance(batch_data, dict):
-                # Include the 'result' text if it exists and is a string
-                if 'result' in batch_data and isinstance(batch_data['result'], str):
-                    all_text.append(batch_data['result'].strip())
-                else:
-                    logging.warning(f"[WARN] Skipping batch. 'result' key not found or not a string in: {str(batch_data)[:50]}...")
+        print(f"[Final Analysis] Error: Failed to load model from {model_path}.")
+        print(f"Details: {e}")
+        sys.exit(1)
+
+def _load_json_data(filepath):
+    """
+    (Internal) Tries to load and parse a JSON file from the given filepath.
+    """
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            print(f"[Final Analysis] Successfully loaded partial results from {filepath}")
+            return data
+    except FileNotFoundError:
+        print(f"[Final Analysis] Error: JSON file not found at {filepath}")
+    except json.JSONDecodeError:
+        print(f"[Final Analysis] Error: Could not decode JSON. Please check the file's format.")
+    except Exception as e:
+        print(f"[Final Analysis] An unexpected error occurred while reading the file: {e}")
+    return None
+
+def _extract_text_from_json(data):
+    """
+    (Internal) Attempts to extract a meaningful block of text from various JSON structures.
+    For this module, it will just serialize the partial results.
+    """
+    # In the context of final analysis, we *always* want to analyze the full
+    # JSON of partial results, not just a single text field.
+    return json.dumps(data, indent=2)
+
+def _get_analysis_messages(json_data, is_direct=False):
+    """
+    (Internal) Creates the system and user prompts for the final analysis.
+    """
+    if is_direct:
+        # For direct analysis, use the full text
+        joined_text = json_data["direct_analysis"]["text"]
+        analysis_type = "full text"
     else:
-        logging.error(f"[ERROR] Expected JSON data to be a dictionary (object), but got {type(data)}.")
-
-    # Join all extracted text pieces with a separator
-    joined_text = "\n\n--- SEPARATOR ---\n\n".join(all_text)
+        # For partial results, serialize the data
+        joined_text = _extract_text_from_json(json_data)
+        analysis_type = "partial analyses from other models"
     
-    if not all_text:
-        logging.warning("[WARN] No 'result' text was extracted from the file.")
-        return ""
-
-    logging.info(f"[INFO] Successfully loaded and joined {len(all_text)} batch result(s). Total text length: {len(joined_text)} characters.")
-    return joined_text
-
-
-# --- Prompt Definition ---
-SYSTEM_PROMPT = "You are a professional social media analyst. Your task is to extract and structure key information from the provided text according to a very strict format."
-
-def generate_chat_prompt(system_prompt: str, joined_text: str) -> List[Dict[str, str]]:
-    """
-    Formats the user and system prompt into the standard list of messages 
-    required by the Llama.create_chat_completion function, using the new 
-    strict analysis template.
-    """
+    # 1. "Extract" text (which is just serializing the partial results)
+    # joined_text = _extract_text_from_json(json_data)
     
-    # The new user prompt includes the strict format instructions and the data
+    # 2. Set the new system prompt
+    system_prompt = (
+        "You are a specialized text analyst. You must follow the user's "
+        "instructions precisely, providing a structured analysis of the provided data "
+        f"(which consists of {analysis_type}) in the exact "
+        "format they request. You must stop at the indicated line."
+    )
+    
+    # 3. Set the user's requested prompt
     user_prompt = f"""Analyze the following text and provide a structured analysis:
 
 TEXT TO ANALYZE:
@@ -103,184 +111,92 @@ RELATIONSHIPS:
 ANOMALIES:
 [List any anomalies or unusual patterns, one per line, or write "None detected"]
 
-CONTROVERSY_SCORE:
+CONTROVERSIAL_SCORE:
 [number]/1.0 - [explanation]
 
 STOP AFTER THIS LINE.
-Print this exact token after the final line: 
+Print this exact token after the final line:A
 """
     
-    messages = [
+    return [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt}
     ]
-    return messages
 
-def combined_analysis( PARTIAL_RESULTS_JSON):
-    """Initializes the Qwen model and runs a streamed inference."""
-    print("--- Structured Qwen Analysis Script ---")
-
-    # 1. Load the input text,
-    joined_text = load_and_join_text(PARTIAL_RESULTS_JSON)
-    if not joined_text:
-        return
-
-    # 2. Check model path
-    if not os.path.exists(MODEL_PATH):
-        print(f"Error: Model file not found at '{MODEL_PATH}'")
-        print("Please update the MODEL_PATH variable in the script.")
-        return
-
+def _run_analysis(llm, messages):
+    """
+    (Internal) Runs a single, streaming analysis and prints/returns the output.
+    This function now explicitly flushes the output buffer after every token.
+    """
+    print("\n[Final Analysis] Assistant: Generating final report... \n", end="", flush=True)
+    full_response = ""
     try:
-        # Initialize the Llama model
-        print(f"\n[INFO] Loading model from {MODEL_PATH}...")
-        print(f"[INFO] Running on CPU only (N_GPU_LAYERS = {N_GPU_LAYERS}).")
-        
-        start_load_time = time.time()
-        
-        llm = Llama(
-            model_path=MODEL_PATH,
-            n_gpu_layers=N_GPU_LAYERS,
-            chat_format=CHAT_FORMAT, 
-            n_ctx=N_CTX,               # Use the expanded context size
-            verbose=False             
-        )
-        
-        end_load_time = time.time()
-        print(f"[INFO] Model loaded successfully in {end_load_time - start_load_time:.2f} seconds.")
-
-        # Prepare the chat messages using the strict template
-        messages = generate_chat_prompt(SYSTEM_PROMPT, joined_text)
-        
-        print("\n" + "="*80)
-        print(f"SYSTEM PROMPT: {SYSTEM_PROMPT}")
-        print("USER PROMPT: [Strict Analysis Template]")
-        print("="*80)
-        print("QWEN STRUCTURED RESPONSE:")
-        
-        # --- Run inference and stream the output ---
-        start_generation_time = time.time()
-        
-        # Increased max_tokens to accommodate the detailed structured output
-        stream = llm.create_chat_completion(
+        response_stream = llm.create_chat_completion(
             messages=messages,
-            temperature=0.0, # Set temperature to 0.0 for strict, deterministic output generation
-            max_tokens=2048, # Increased output limit
+            max_tokens=OUTPUT_TOKENS,
             stream=True,
-            # Add a specific stop sequence to enforce the model stops exactly after the format
-            stop=["STOP AFTER THIS LINE."],
+            # We can use the prompt's stop instruction as a stop token
+            stop=["STOP AFTER THIS LINE."] 
         )
+        
+        for chunk in response_stream:
+            delta = chunk["choices"][0]["delta"]
+            if "content" in delta:
+                token = delta["content"]
+                print(token, end="") # Using end="" to avoid extra newlines
+                sys.stdout.flush()   # Explicitly flush the buffer
+                full_response += token
+        
+        print() # Newline after full response
+        return full_response.strip()
 
-        full_response = ""
-        for chunk in stream:
-            # Extract the content from the chunk
-            content = chunk["choices"][0]["delta"].get("content", "")
-            if content:
-                print(content, end="", flush=True)
-                full_response += content
-
-        end_generation_time = time.time()
-        
-        # Final timing statistics
-        total_time = end_generation_time - start_generation_time
-        
-        # Count tokens (a rough estimate based on the length of the string)
-        response_tokens = len(full_response.split()) 
-        
-        print("\n\n" + "-"*80)
-        print(f"[STATS] Generation Time: {total_time:.2f} seconds")
-        print(f"[STATS] Estimated Output Tokens: {response_tokens}")
-        if total_time > 0:
-            print(f"[STATS] Estimated Tokens/Sec: {response_tokens / total_time:.2f} tokens/s")
-        print("-" * 80)
-        return full_response
     except Exception as e:
-        print(f"\nAn error occurred during runtime: {e}")
-        print("HINT: Ensure 'llama-cpp-python' is installed correctly and your model path is accurate.")
+        print(f"\n[Final Analysis] An error occurred during analysis: {e}")
+        return None
 
+# --- Main Public Function ---
 
-def run_qwen_inference():
-    """Initializes the Qwen model and runs a streamed inference."""
-    print("--- Structured Qwen Analysis Script ---")
+def combined_analysis(data, is_direct=False):
+    """
+    Orchestrates the final analysis of partial results or direct text.
+    
+    This function is called by main.py. It loads the partial results
+    from the given JSON file or uses direct analysis data, loads a GGUF model, runs a
+    structured analysis prompt over the data, streams the result,
+    and then returns the complete analysis as a string.
+    
+    Args:
+        data: Either a path to a JSON file with partial results, or a dictionary with direct analysis data
+        is_direct: Boolean flag indicating if this is a direct analysis
+    """
+    
+    if is_direct:
+        # Handle direct analysis
+        logging.info("Performing direct analysis on full text.")
+        json_data = data
+    else:
+        # Handle partial results analysis (existing logic)
+        json_data = _load_json_data(data)
+        if not json_data:
+            return "ERROR: [Final Analysis] Failed to load partial results JSON."
 
-    # 1. Load the input text
-    joined_text = load_and_join_text(JSON_FILE_PATH)
-    if not joined_text:
-        return
+    # 2. Create initial prompts
+    messages = _get_analysis_messages(json_data, is_direct)
 
-    # 2. Check model path
-    if not os.path.exists(MODEL_PATH):
-        print(f"Error: Model file not found at '{MODEL_PATH}'")
-        print("Please update the MODEL_PATH variable in the script.")
-        return
+    # 3. Load the model
+    llm = _load_model(MODEL_PATH, INPUT_TOKENS, N_GPU_LAYERS)
+    
+    # 4. Run the single analysis
+    final_report = _run_analysis(llm, messages)
 
-    try:
-        # Initialize the Llama model
-        print(f"\n[INFO] Loading model from {MODEL_PATH}...")
-        print(f"[INFO] Running on CPU only (N_GPU_LAYERS = {N_GPU_LAYERS}).")
-        
-        start_load_time = time.time()
-        
-        llm = Llama(
-            model_path=MODEL_PATH,
-            n_gpu_layers=N_GPU_LAYERS,
-            chat_format=CHAT_FORMAT, 
-            n_ctx=N_CTX,               # Use the expanded context size
-            verbose=False             
-        )
-        
-        end_load_time = time.time()
-        print(f"[INFO] Model loaded successfully in {end_load_time - start_load_time:.2f} seconds.")
+    # 5. Release resources and exit
+    print("\n[Final Analysis] Analysis complete. Releasing model resources.")
+    del llm  # Explicitly delete the Llama object to free memory
+    print("[Final Analysis] Resources released.")
+    
+    return final_report
 
-        # Prepare the chat messages using the strict template
-        messages = generate_chat_prompt(SYSTEM_PROMPT, joined_text)
-        
-        print("\n" + "="*80)
-        print(f"SYSTEM PROMPT: {SYSTEM_PROMPT}")
-        print("USER PROMPT: [Strict Analysis Template]")
-        print("="*80)
-        print("QWEN STRUCTURED RESPONSE:")
-        
-        # --- Run inference and stream the output ---
-        start_generation_time = time.time()
-        
-        # Increased max_tokens to accommodate the detailed structured output
-        stream = llm.create_chat_completion(
-            messages=messages,
-            temperature=0.0, # Set temperature to 0.0 for strict, deterministic output generation
-            max_tokens=2048, # Increased output limit
-            stream=True,
-            # Add a specific stop sequence to enforce the model stops exactly after the format
-            stop=["STOP AFTER THIS LINE."],
-        )
-
-        full_response = ""
-        for chunk in stream:
-            # Extract the content from the chunk
-            content = chunk["choices"][0]["delta"].get("content", "")
-            if content:
-                print(content, end="", flush=True)
-                full_response += content
-
-        end_generation_time = time.time()
-        
-        # Final timing statistics
-        total_time = end_generation_time - start_generation_time
-        
-        # Count tokens (a rough estimate based on the length of the string)
-        response_tokens = len(full_response.split()) 
-        
-        print("\n\n" + "-"*80)
-        print(f"[STATS] Generation Time: {total_time:.2f} seconds")
-        print(f"[STATS] Estimated Output Tokens: {response_tokens}")
-        if total_time > 0:
-            print(f"[STATS] Estimated Tokens/Sec: {response_tokens / total_time:.2f} tokens/s")
-        print("-" * 80)
-        
-    except Exception as e:
-        print(f"\nAn error occurred during runtime: {e}")
-        print("HINT: Ensure 'llama-cpp-python' is installed correctly and your model path is accurate.")
-
-if __name__ == "__main__":
-    run_qwen_inference()
-
+# Note: No __main__ block, as this is now a module to be imported.
+def main():
+    json_path = "/home/anand/Documents/data/tweets_output365498.json"
+    combined_analysis(json_path)
